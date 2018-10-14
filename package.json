@@ -1,0 +1,44 @@
+{
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5",
+    "telegraf": "^3.24.0"
+  },
+  "devDependencies": {
+    "xo": "^0.23.0"
+  },
+  "scripts": {
+    "xo": "xo",
+    "start": "node index.js",
+    "test": "xo"
+  },
+  "config": {
+    "tokenpath": "/run/secrets/wdrmaus-bottoken.txt",
+    "tokenpathdebug": "token.txt"
+  },
+  "xo": {
+    "space": true,
+    "semicolon": false,
+    "overrides": [
+      {
+        "files": [
+          "index.js"
+        ],
+        "rules": {
+          "camelcase": [
+            "warn",
+            {
+              "properties": "never"
+            }
+          ]
+        }
+      }
+    ]
+
+  }
+}

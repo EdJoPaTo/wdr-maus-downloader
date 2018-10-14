@@ -1,0 +1,13 @@
+botfather-settings/userpic.png
+
+# node
+node_modules
+.nyc_output
+
+# botfiles
+additionalEvents
+eventfiles
+meals
+tmp
+token.txt
+userconfig

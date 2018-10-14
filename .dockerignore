@@ -1,0 +1,10 @@
+.*
+**/*.test.js
+Dockerfile
+node_modules
+README.md
+
+# botfiles
+botfather-settings
+tmp
+token.txt
