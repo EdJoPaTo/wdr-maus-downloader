@@ -2,7 +2,7 @@ const fsPromises = require('fs').promises
 
 async function doit() {
   const rslconfig = JSON.parse(await fsPromises.readFile('resilio-config.json', 'utf8'))
-  const share = await fsPromises.readFile('/run/secrets/wdrmaus-resilio-share.txt', 'utf8').trim()
+  const share = (await fsPromises.readFile('/run/secrets/wdrmaus-resilio-share.txt', 'utf8')).trim()
 
   rslconfig.shared_folders[0].secret = share
 
