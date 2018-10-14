@@ -18,9 +18,7 @@ function downloadCommandLine(video, captions, targetfile) {
 
 async function download(video, captions, targetfile) {
   const command = downloadCommandLine(video, captions, targetfile)
-  console.log('download start', targetfile)
   const result = await exec(command)
-  console.log('download finished', targetfile)
   return result
 }
 

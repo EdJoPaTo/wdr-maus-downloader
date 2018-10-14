@@ -48,15 +48,23 @@ async function sendWhenNew() {
   const {videoURL: normalVideo, slVideoURL: dgsVideo} = mediaObjJson.mediaResource.dflt
   const captionsUrl = mediaObjJson.mediaResource.captionsHash.srt
 
+  console.log('start download…')
   console.time('download')
-  await Promise.all([
-    request.get(img)
-      .pipe(fs.createWriteStream(FILE_PATH + '1image.jpg')),
-    download('https:' + normalVideo, 'https:' + captionsUrl, FILE_PATH + '2normal.mp4')
-    // Disable temporarily
-    // download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH + '3dgs.mp4')
-  ])
-  console.timeEnd('download')
+
+  console.time('download 1image')
+  await request.get(img)
+    .pipe(fs.createWriteStream(FILE_PATH + '1image.jpg'))
+  console.timeEnd('download 1image')
+
+  console.time('download 2normal')
+  await download('https:' + normalVideo, 'https:' + captionsUrl, FILE_PATH + '2normal.mp4')
+  console.timeEnd('download 2normal')
+
+  // Disable temporarily
+  // console.time('download 3dgs')
+  // await download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH + '3dgs.mp4')
+  // console.timeEnd('download 3dgs')
+  // console.timeEnd('download')
 
   let caption = date
   caption += '\nVideo: https:' + normalVideo
