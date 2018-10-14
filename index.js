@@ -52,8 +52,9 @@ async function sendWhenNew() {
   await Promise.all([
     request.get(img)
       .pipe(fs.createWriteStream(FILE_PATH + '1image.jpg')),
-    download('https:' + normalVideo, 'https:' + captionsUrl, FILE_PATH + '2normal.mp4'),
-    download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH + '3dgs.mp4')
+    download('https:' + normalVideo, 'https:' + captionsUrl, FILE_PATH + '2normal.mp4')
+    // Disable temporarily
+    // download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH + '3dgs.mp4')
   ])
   console.timeEnd('download')
 
