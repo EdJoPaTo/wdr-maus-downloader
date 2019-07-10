@@ -12,6 +12,7 @@ function downloadCommandLine(video, captions, targetfile) {
   if (process.env.NODE_ENV !== 'production') {
     command += ' -t 0:15'
   }
+
   command += ` "${targetfile}"`
   return command
 }

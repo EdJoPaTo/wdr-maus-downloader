@@ -92,6 +92,7 @@ async function run() {
     bot.telegram.sendMessage(ERROR_TARGET, '```\n' + JSON.stringify(error, null, 2) + '\n```', Extra.markdown())
   }
 }
+
 run()
 if (process.env.NODE_ENV === 'production') {
   setInterval(run, 1000 * 60 * 15) // Every 15 minutes
