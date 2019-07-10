@@ -10,6 +10,7 @@ function downloadCommandLine(video, captions, targetfile) {
   command += ' -c copy  -c:s mov_text'
   command += ' -codec:v h264'
   if (process.env.NODE_ENV !== 'production') {
+    // Only 15 seconds for faster finish
     command += ' -t 0:15'
   }
 
