@@ -1,4 +1,4 @@
-const {existsSync, readFileSync} = require('fs')
+const {existsSync, readFileSync, createWriteStream} = require('fs')
 const fsPromises = require('fs').promises
 
 const request = require('request-promise-native')
@@ -53,7 +53,7 @@ async function sendWhenNew() {
 
   console.time('download 1image')
   await request.get(img)
-    .pipe(fs.createWriteStream(FILE_PATH + '1image.jpg'))
+    .pipe(createWriteStream(FILE_PATH + '1image.jpg'))
   console.timeEnd('download 1image')
 
   console.time('download 2normal')
