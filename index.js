@@ -93,7 +93,9 @@ async function run() {
   }
 }
 
-run()
 if (process.env.NODE_ENV === 'production') {
+  // Dont run immediately as resilio might need time to setup
   setInterval(run, 1000 * 60 * 15) // Every 15 minutes
+} else {
+  run()
 }
