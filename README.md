@@ -24,6 +24,6 @@ So this is not documented well.
 
 ### Docker Secrets that have to be set
 
-`wdrmaus-resilio-share.txt`: The Resilio Sync Share secret (needs write access).
+`resilio-share.txt`: The Resilio Sync Share secret (needs write access).
 
-`wdrmaus-bottoken.txt`: The bot token of the Telegram Bot that is used.
+`bot-token.txt`: The bot token of the Telegram Bot that is used.

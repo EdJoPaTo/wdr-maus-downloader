@@ -1,4 +1,4 @@
-const fs = require('fs')
+const {existsSync, readFileSync} = require('fs')
 const fsPromises = require('fs').promises
 
 const request = require('request-promise-native')
@@ -13,8 +13,8 @@ const ERROR_TARGET = '-1001214301516'
 const BASE_URL = 'https://www.wdrmaus.de/aktuelle-sendung/'
 const FILE_PATH = './tmp/'
 
-const tokenFilePath = process.env.NODE_ENV === 'production' ? process.env.npm_package_config_tokenpath : process.env.npm_package_config_tokenpathdebug
-const token = fs.readFileSync(tokenFilePath, 'utf8').trim()
+const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' : 'bot-token.txt'
+const token = readFileSync(tokenFilePath, 'utf8').trim()
 const bot = new Telegraf(token)
 
 async function sendWhenNew() {
