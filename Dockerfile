@@ -19,6 +19,6 @@ RUN apt-get update && apt-get -y --no-install-recommends install ffmpeg && rm -r
 
 COPY --from=rslsync /usr/bin/rslsync /usr/bin/rslsync
 COPY --from=node-builder /build/node_modules ./node_modules
+COPY source ./
 
-COPY . ./
-CMD ./docker-run.sh
+CMD [ "/usr/local/bin/node", "index.js" ]

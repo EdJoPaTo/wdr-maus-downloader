@@ -5,6 +5,7 @@ const request = require('request-promise-native')
 const Telegraf = require('telegraf')
 
 const {download} = require('./download')
+const {sync} = require('./resilio')
 
 const {Extra} = Telegraf
 
@@ -12,6 +13,8 @@ const TARGET_CHAT = '-1001214301516'
 const ERROR_TARGET = '-1001214301516'
 const BASE_URL = 'https://www.wdrmaus.de/aktuelle-sendung/'
 const FILE_PATH = './tmp/'
+
+sync()
 
 const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' : 'bot-token.txt'
 const token = readFileSync(tokenFilePath, 'utf8').trim()
