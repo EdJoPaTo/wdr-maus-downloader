@@ -1,3 +1,10 @@
+FROM node:12-stretch AS node-builder
+WORKDIR /build
+
+COPY package.json package-lock.json ./
+RUN npm ci --production
+
+
 FROM resilio/sync AS rslsync
 
 
@@ -10,10 +17,8 @@ ENV NODE_ENV=production
 
 RUN apt-get update && apt-get -y --no-install-recommends install ffmpeg && rm -rf /var/lib/apt/lists/*
 
-COPY package.json package-lock.json ./
-RUN npm ci
-
 COPY --from=rslsync /usr/bin/rslsync /usr/bin/rslsync
+COPY --from=node-builder /build/node_modules ./node_modules
 
 COPY . ./
 CMD ./docker-run.sh
