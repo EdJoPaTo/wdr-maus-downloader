@@ -1,4 +1,4 @@
-FROM node:12-stretch AS node-builder
+FROM node:12-buster AS node-builder
 WORKDIR /build
 
 COPY package.json package-lock.json ./
@@ -8,7 +8,7 @@ RUN npm ci --production
 FROM resilio/sync AS rslsync
 
 
-FROM node:12-stretch
+FROM node:12-buster
 WORKDIR /app
 VOLUME /app/tmp
 VOLUME /var/lib/resilio-sync
