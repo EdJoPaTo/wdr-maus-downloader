@@ -33,7 +33,7 @@ async function sendWhenNew(): Promise<void> {
 
 	const date: string = mediaObjJson.trackerData.trackerClipAirTime
 	const dateFilenamePart = parseDateToFilenamePart(date)
-	const filenamePrefix = FILE_PATH + dateFilenamePart + '-'
+	const filenamePrefix = FILE_PATH + 'wdrmaus-' + dateFilenamePart + '-'
 
 	const last = await getLastRunMediaObj()
 	const areEqual = JSON.stringify(last) === JSON.stringify(mediaObjJson)
