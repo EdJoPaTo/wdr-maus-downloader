@@ -1,8 +1,13 @@
 FROM node:12-buster AS node-builder
 WORKDIR /build
 
-COPY package.json package-lock.json ./
-RUN npm ci --production
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm ci
+
+COPY source source
+RUN npx tsc
+
+RUN rm -rf node_modules && npm ci --production
 
 
 FROM resilio/sync AS rslsync
@@ -19,6 +24,8 @@ RUN apt-get update && apt-get -y --no-install-recommends install ffmpeg && rm -r
 
 COPY --from=rslsync /usr/bin/rslsync /usr/bin/rslsync
 COPY --from=node-builder /build/node_modules ./node_modules
-COPY source ./
 
-CMD [ "/usr/local/bin/node", "index.js" ]
+COPY resilio-config.json ./
+COPY --from=node-builder /build/dist ./
+
+CMD node index.js

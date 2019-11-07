@@ -1,9 +1,10 @@
-botfather-settings/userpic.png
-
-# node
-node_modules
 .nyc_output
+coverage
+dist
+node_modules
+yarn.lock
 
-# botfiles
-tmp
+botfather-settings/*.png
+
 bot-token.txt
+tmp

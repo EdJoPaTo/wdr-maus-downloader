@@ -11,20 +11,39 @@
     "telegraf": "^3.24.0"
   },
   "devDependencies": {
-    "xo": "^0.24.0"
+    "@sindresorhus/tsconfig": "^0.6.0",
+    "@types/node": "^12.12.6",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
+    "del-cli": "^3.0.0",
+    "eslint-config-xo-typescript": "^0.21.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.7.2",
+    "xo": "^0.25.3"
   },
   "scripts": {
-    "xo": "xo",
-    "start": "node index.js",
-    "test": "xo"
+    "build": "del dist && tsc",
+    "prepack": "npm run build",
+    "start": "ts-node source/index.js",
+    "test": "tsc && xo"
   },
   "xo": {
-    "space": true,
-    "semicolon": false,
+    "semi": false,
+    "extends": "xo-typescript",
+    "extensions": [
+      "ts"
+    ],
+    "rules": {
+      "require-atomic-updates": "warn",
+      "@typescript-eslint/semi": [
+        "error",
+        "never"
+      ]
+    },
     "overrides": [
       {
         "files": [
-          "index.js"
+          "index.*"
         ],
         "rules": {
           "camelcase": [

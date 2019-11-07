@@ -1,10 +1,12 @@
 .*
-**/*.test.js
+*.md
+**/*.test.*
+botfather-settings
+dist
 Dockerfile
 node_modules
-README.md
+test
 
 # botfiles
-botfather-settings
-tmp
 bot-token.txt
+tmp
