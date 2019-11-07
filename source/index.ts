@@ -31,7 +31,9 @@ async function sendWhenNew(): Promise<void> {
 		.slice(0, -2)
 	const mediaObjJson = JSON.parse(mediaObjJsonString)
 
-	const date = mediaObjJson.trackerData.trackerClipAirTime
+	const date: string = mediaObjJson.trackerData.trackerClipAirTime
+	const dateFilenamePart = parseDateToFilenamePart(date)
+	const filenamePrefix = FILE_PATH + dateFilenamePart + '-'
 
 	const last = await getLastRunMediaObj()
 	const areEqual = JSON.stringify(last) === JSON.stringify(mediaObjJson)
@@ -56,16 +58,16 @@ async function sendWhenNew(): Promise<void> {
 
 	console.time('download 1image')
 	request.get(img)
-		.pipe(createWriteStream(FILE_PATH + '1image.jpg'))
+		.pipe(createWriteStream(filenamePrefix + '1image.jpg'))
 	console.timeEnd('download 1image')
 
 	console.time('download 2normal')
-	await download('https:' + normalVideo, 'https:' + captionsUrl, FILE_PATH + '2normal.mp4')
+	await download('https:' + normalVideo, 'https:' + captionsUrl, filenamePrefix + '2normal.mp4')
 	console.timeEnd('download 2normal')
 
 	// Disable temporarily
 	// console.time('download 3dgs')
-	// await download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH + '3dgs.mp4')
+	// await download('https:' + dgsVideo, 'https:' + captionsUrl, filenamePrefix + '3dgs.mp4')
 	// console.timeEnd('download 3dgs')
 	// console.timeEnd('download')
 
@@ -85,6 +87,11 @@ async function getLastRunMediaObj(): Promise<any> {
 
 async function saveMediaObj(mediaObj: any): Promise<void> {
 	return fsPromises.writeFile(FILE_PATH + 'last.json', JSON.stringify(mediaObj, null, 2), 'utf8')
+}
+
+function parseDateToFilenamePart(date: string): string {
+	const [day, month, year, hour, minute] = date.split(/[. :]/g)
+	return [year, month, day, hour, minute].join('-')
 }
 
 async function run(): Promise<void> {
