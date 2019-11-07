@@ -14,7 +14,9 @@ const ERROR_TARGET = '-1001214301516'
 const BASE_URL = 'https://www.wdrmaus.de/aktuelle-sendung/'
 const FILE_PATH = './tmp/'
 
-sync()
+if (process.env.NODE_ENV === 'production') {
+  sync()
+}
 
 const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' : 'bot-token.txt'
 const token = readFileSync(tokenFilePath, 'utf8').trim()
