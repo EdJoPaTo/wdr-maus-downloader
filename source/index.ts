@@ -91,7 +91,7 @@ async function saveMediaObj(mediaObj: any): Promise<void> {
 
 function parseDateToFilenamePart(date: string): string {
 	const [day, month, year, hour, minute] = date.split(/[. :]/g)
-	return [year, month, day, hour, minute].join('-')
+	return `${year}-${month}-${day}T${hour}-${minute}`
 }
 
 async function run(): Promise<void> {
