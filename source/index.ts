@@ -53,6 +53,14 @@ async function sendWhenNew(): Promise<void> {
 	const normalVideo: string = mediaObjJson.mediaResource.dflt.videoURL
 	const captionsUrl: string = mediaObjJson.mediaResource.captionsHash.srt
 
+	let caption = ''
+	caption += '\n' + date
+	caption += '\nVideo: https:' + normalVideo
+	caption += '\nDGS: https:' + dgsVideo
+	caption += '\nUntertitel: https:' + captionsUrl
+
+	await bot.telegram.sendMessage(TARGET_CHAT, caption, Extra.inReplyTo(photoMessage.message_id) as any)
+
 	console.log('start download…')
 	console.time('download')
 
@@ -71,12 +79,7 @@ async function sendWhenNew(): Promise<void> {
 	// console.timeEnd('download 3dgs')
 	// console.timeEnd('download')
 
-	let caption = date
-	caption += '\nVideo: https:' + normalVideo
-	caption += '\nDGS: https:' + dgsVideo
-	caption += '\nUntertitel: https:' + captionsUrl
-
-	await bot.telegram.sendMessage(TARGET_CHAT, caption, Extra.inReplyTo(photoMessage.message_id) as any)
+	await bot.telegram.sendMessage(TARGET_CHAT, 'finished download', Extra.inReplyTo(photoMessage.message_id) as any)
 }
 
 async function getLastRunMediaObj(): Promise<any> {
