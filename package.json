@@ -14,13 +14,10 @@
     "@sindresorhus/tsconfig": "^0.7.0",
     "@types/node": "^13.7.1",
     "@types/request-promise-native": "^1.0.17",
-    "@typescript-eslint/eslint-plugin": "^2.19.2",
-    "@typescript-eslint/parser": "^2.19.2",
     "del-cli": "^3.0.0",
-    "eslint-config-xo-typescript": "^0.26.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.7.2",
-    "xo": "^0.26.1"
+    "xo": "^0.28.0"
   },
   "scripts": {
     "build": "del dist && tsc",
@@ -35,8 +32,8 @@
       "ts"
     ],
     "rules": {
-      "require-atomic-updates": "warn",
       "prefer-named-capture-group": "off",
+      "unicorn/prevent-abbreviations": "off",
       "@typescript-eslint/semi": [
         "error",
         "never"
