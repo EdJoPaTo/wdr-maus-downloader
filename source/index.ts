@@ -77,8 +77,8 @@ async function sendWhenNew(): Promise<void> {
 	// console.time('download 3dgs')
 	// await download('https:' + dgsVideo, 'https:' + captionsUrl, filenamePrefix + '3dgs.mp4')
 	// console.timeEnd('download 3dgs')
-	// console.timeEnd('download')
 
+	console.timeEnd('download')
 	await bot.telegram.sendMessage(TARGET_CHAT, 'finished download', Extra.inReplyTo(photoMessage.message_id) as any)
 }
 
