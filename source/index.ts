@@ -63,12 +63,6 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 		return
 	}
 
-	const photoMessage = await bot.telegram.sendPhoto(TARGET_CHAT, img, new Extra({
-		caption: date
-	}).notifications(false) as any)
-
-	await saveMediaObj(context, mediaObjJson)
-
 	const dgsVideo: string = mediaObjJson.mediaResource.dflt.slVideoURL
 	const normalVideo: string = mediaObjJson.mediaResource.dflt.videoURL
 	const captionsUrl: string = mediaObjJson.mediaResource.captionsHash.srt
@@ -80,7 +74,11 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	caption += '\nDGS: https:' + dgsVideo
 	caption += '\nUntertitel: https:' + captionsUrl
 
-	await bot.telegram.sendMessage(TARGET_CHAT, caption, Extra.inReplyTo(photoMessage.message_id) as any)
+	const photoMessage = await bot.telegram.sendPhoto(TARGET_CHAT, img, new Extra({
+		caption
+	}).notifications(false) as any)
+
+	await saveMediaObj(context, mediaObjJson)
 
 	console.log(`start download ${context}…`)
 	console.time('download')
