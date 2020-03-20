@@ -2,7 +2,7 @@
   "device_name": "wdr-maus-downloader",
   "storage_path": "/var/lib/resilio-sync",
   "use_upnp": false,
-  "external_port": "55385",
+  "external_port": 55385,
   "sync_trash_ttl": 1,
   "shared_folders": [{
     "secret": "will be set in running container from secret 'wdrmaus-resilio-share.txt'",
