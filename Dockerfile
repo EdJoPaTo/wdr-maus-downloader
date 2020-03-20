@@ -15,7 +15,7 @@ FROM resilio/sync AS rslsync
 
 FROM node:12-buster
 
-# Expose Resilio external Port
+# Expose Resilio listening Port
 # (randomly selected in order to differ from the rslsync container default 55555)
 # In order to work it has to be the same on the host machine
 EXPOSE 55385
