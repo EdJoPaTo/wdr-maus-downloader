@@ -8,7 +8,7 @@ import {sync} from './resilio'
 
 const TARGET_CHAT = '-1001214301516'
 const ERROR_TARGET = '-1001214301516'
-const FILE_PATH = './resilio-share/'
+const FILE_PATH = 'resilio-share/'
 
 if (process.env.NODE_ENV === 'production') {
 	sync()
@@ -53,7 +53,7 @@ async function getMediaObjJson(source: string): Promise<any> {
 async function sendWhenNew(context: string, img: string, mediaObjJson: any): Promise<void> {
 	const date: string = mediaObjJson.trackerData.trackerClipAirTime
 	const dateFilenamePart = parseDateToFilenamePart(date)
-	const filenamePrefix = FILE_PATH + 'wdrmaus-' + context + '-' + dateFilenamePart + '-'
+	const filenamePrefix = 'wdrmaus-' + context + '-' + dateFilenamePart + '-'
 
 	const last = await getLastRunMediaObj(context)
 	const areEqual = JSON.stringify(last) === JSON.stringify(mediaObjJson)
@@ -85,16 +85,16 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 
 	console.time('download 1image')
 	request.get(img)
-		.pipe(createWriteStream(filenamePrefix + '1image.jpg'))
+		.pipe(createWriteStream(FILE_PATH + filenamePrefix + '1image.jpg'))
 	console.timeEnd('download 1image')
 
 	console.time('download 2normal')
-	await download('https:' + normalVideo, captionsUrl ? 'https:' + captionsUrl : undefined, filenamePrefix + '2normal.mp4')
+	await download('https:' + normalVideo, captionsUrl ? 'https:' + captionsUrl : undefined, FILE_PATH, filenamePrefix + '2normal.mp4')
 	console.timeEnd('download 2normal')
 
 	// Disable temporarily
 	// console.time('download 3dgs')
-	// await download('https:' + dgsVideo, 'https:' + captionsUrl, filenamePrefix + '3dgs.mp4')
+	// await download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH, filenamePrefix + '3dgs.mp4')
 	// console.timeEnd('download 3dgs')
 
 	console.timeEnd('download')

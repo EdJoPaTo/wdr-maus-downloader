@@ -22,6 +22,7 @@ EXPOSE 55385
 
 WORKDIR /app
 VOLUME /app/resilio-share
+VOLUME /app/tmp
 VOLUME /var/lib/resilio-sync
 
 ENV NODE_ENV=production

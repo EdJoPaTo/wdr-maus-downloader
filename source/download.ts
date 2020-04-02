@@ -1,5 +1,6 @@
-import util from 'util'
+import {promises as fsPromises} from 'fs'
 import childProcess from 'child_process'
+import util from 'util'
 
 const exec = util.promisify(childProcess.exec)
 
@@ -21,8 +22,10 @@ function downloadCommandLine(video: string, captions: string | undefined, target
 	return command
 }
 
-export async function download(video: string, captions: string | undefined, targetfile: string): Promise<{stdout: string; stderr: string}> {
-	const command = downloadCommandLine(video, captions, targetfile)
+export async function download(video: string, captions: string | undefined, targetfolder: string, filename: string): Promise<{stdout: string; stderr: string}> {
+	const temporaryFile = 'tmp/' + filename
+	const command = downloadCommandLine(video, captions, temporaryFile)
 	const result = await exec(command)
+	await fsPromises.rename(temporaryFile, targetfolder + filename)
 	return result
 }
