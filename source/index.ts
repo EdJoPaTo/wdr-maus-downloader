@@ -4,6 +4,7 @@ import request from 'request-promise-native'
 import Telegraf, {Extra} from 'telegraf'
 
 import {download} from './download'
+import {parseMediaObjectJson, mediaInformationFromMediaObjectJson} from './parse-media-obj'
 import {sync} from './resilio'
 
 const TARGET_CHAT = '-1001214301516'
@@ -43,18 +44,10 @@ async function checkZusatzsendung(): Promise<void> {
 async function getMediaObjJson(source: string): Promise<any> {
 	const mediaObjUrl = /mediaObj': { 'url': '(https:[^']+)/.exec(source)![1]
 	const mediaObjString = await request(mediaObjUrl)
-	const mediaObjJsonString = mediaObjString
-		.replace('$mediaObject.jsonpHelper.storeAndPlay(', '')
-		.slice(0, -2)
-	const mediaObjJson = JSON.parse(mediaObjJsonString)
-	return mediaObjJson
+	return parseMediaObjectJson(mediaObjString)
 }
 
 async function sendWhenNew(context: string, img: string, mediaObjJson: any): Promise<void> {
-	const date: string = mediaObjJson.trackerData.trackerClipAirTime
-	const dateFilenamePart = parseDateToFilenamePart(date)
-	const filenamePrefix = 'wdrmaus-' + context + '-' + dateFilenamePart + '-'
-
 	const last = await getLastRunMediaObj(context)
 	const areEqual = JSON.stringify(last) === JSON.stringify(mediaObjJson)
 	if (areEqual) {
@@ -63,16 +56,19 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 		return
 	}
 
-	const dgsVideo: string = mediaObjJson.mediaResource.dflt.slVideoURL
-	const normalVideo: string = mediaObjJson.mediaResource.dflt.videoURL
-	const captionsUrl: string = mediaObjJson.mediaResource.captionsHash.srt
+	const mediaInformation = mediaInformationFromMediaObjectJson(mediaObjJson)
+	const filenamePrefix = 'wdrmaus-' + context + '-' + mediaInformation.airtimeISO + '-'
 
-	let caption = ''
-	caption += '\n' + context
-	caption += '\n' + date
-	caption += '\nVideo: https:' + normalVideo
-	caption += '\nDGS: https:' + dgsVideo
-	caption += '\nUntertitel: https:' + captionsUrl
+	const caption = [
+		captionInfoEntry(undefined, context),
+		captionInfoEntry('Title', mediaInformation.title),
+		captionInfoEntry('Airtime', mediaInformation.airtime),
+		captionInfoEntry('Video', mediaInformation.videoNormal),
+		captionInfoEntry('DGS', mediaInformation.videoDgs),
+		captionInfoEntry('Caption', mediaInformation.captionsSrt)
+	]
+		.filter(o => o)
+		.join('\n')
 
 	const photoMessage = await bot.telegram.sendPhoto(TARGET_CHAT, img, new Extra({
 		caption
@@ -89,17 +85,32 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	console.timeEnd('download 1image')
 
 	console.time('download 2normal')
-	await download('https:' + normalVideo, captionsUrl ? 'https:' + captionsUrl : undefined, FILE_PATH, filenamePrefix + '2normal.mp4')
+	await download(mediaInformation.videoNormal, mediaInformation.captionsSrt, FILE_PATH, filenamePrefix + '2normal.mp4')
 	console.timeEnd('download 2normal')
 
-	if (dgsVideo) {
+	if (mediaInformation.videoDgs) {
 		console.time('download 3dgs')
-		await download('https:' + dgsVideo, captionsUrl ? 'https:' + captionsUrl : undefined, FILE_PATH, filenamePrefix + '3dgs.mp4')
+		await download(mediaInformation.videoDgs, mediaInformation.captionsSrt, FILE_PATH, filenamePrefix + '2normal.mp4')
 		console.timeEnd('download 3dgs')
 	}
 
 	console.timeEnd('download')
 	await bot.telegram.sendMessage(TARGET_CHAT, 'finished download', Extra.inReplyTo(photoMessage.message_id) as any)
+}
+
+function captionInfoEntry(label: string | undefined, content: string | undefined): string | undefined {
+	if (!content) {
+		return undefined
+	}
+
+	let result = ''
+	if (label) {
+		result += label
+		result += ': '
+	}
+
+	result += content
+	return result
 }
 
 async function getLastRunMediaObj(filename: string): Promise<any> {
@@ -110,11 +121,6 @@ async function getLastRunMediaObj(filename: string): Promise<any> {
 
 async function saveMediaObj(filename: string, mediaObj: any): Promise<void> {
 	return fsPromises.writeFile(FILE_PATH + filename + '.json', JSON.stringify(mediaObj, null, 2), 'utf8')
-}
-
-function parseDateToFilenamePart(date: string): string {
-	const [day, month, year, hour, minute] = date.split(/[. :]/g)
-	return `${year}-${month}-${day}T${hour}-${minute}`
 }
 
 async function run(): Promise<void> {
