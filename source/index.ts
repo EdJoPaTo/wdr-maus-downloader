@@ -133,15 +133,24 @@ async function saveMediaObj(filename: string, mediaObj: any): Promise<void> {
 	return fsPromises.writeFile(FILE_PATH + filename + '.json', JSON.stringify(mediaObj, null, 2), 'utf8')
 }
 
+async function handleError(error: any): Promise<void> {
+	console.log(error)
+	await bot.telegram.sendMessage(ERROR_TARGET, '```\n' + JSON.stringify(error, null, 2) + '\n```', Extra.markdown() as any)
+}
+
+let currentlyRunning = false
 async function run(): Promise<void> {
-	try {
-		await checkAktuelleSendung()
-		await checkCorona()
-		await checkZusatzsendung()
-	} catch (error) {
-		console.log(error)
-		bot.telegram.sendMessage(ERROR_TARGET, '```\n' + JSON.stringify(error, null, 2) + '\n```', Extra.markdown() as any)
+	if (currentlyRunning) {
+		return
 	}
+
+	currentlyRunning = true
+
+	await checkAktuelleSendung().catch(handleError)
+	await checkCorona().catch(handleError)
+	await checkZusatzsendung().catch(handleError)
+
+	currentlyRunning = false
 }
 
 if (process.env.NODE_ENV === 'production') {
