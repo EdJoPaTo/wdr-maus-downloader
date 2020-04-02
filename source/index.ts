@@ -8,7 +8,7 @@ import {sync} from './resilio'
 
 const TARGET_CHAT = '-1001214301516'
 const ERROR_TARGET = '-1001214301516'
-const FILE_PATH = './tmp/'
+const FILE_PATH = './resilio-share/'
 
 if (process.env.NODE_ENV === 'production') {
 	sync()

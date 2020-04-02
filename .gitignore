@@ -7,4 +7,5 @@ yarn.lock
 botfather-settings/*.png
 
 bot-token.txt
+resilio-share
 tmp

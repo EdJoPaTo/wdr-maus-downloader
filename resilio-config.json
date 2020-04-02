@@ -6,7 +6,7 @@
   "sync_trash_ttl": 1,
   "shared_folders": [{
     "secret": "will be set in running container from secret 'wdrmaus-resilio-share.txt'",
-    "dir": "/app/tmp",
+    "dir": "/app/resilio-share",
     "search_lan": false,
     "use_sync_trash": false
   }]

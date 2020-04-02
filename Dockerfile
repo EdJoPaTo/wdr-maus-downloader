@@ -21,7 +21,7 @@ FROM node:12-buster
 EXPOSE 55385
 
 WORKDIR /app
-VOLUME /app/tmp
+VOLUME /app/resilio-share
 VOLUME /var/lib/resilio-sync
 
 ENV NODE_ENV=production
