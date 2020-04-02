@@ -146,7 +146,9 @@ async function run(): Promise<void> {
 
 if (process.env.NODE_ENV === 'production') {
 	// Dont run immediately as resilio might need time to setup
-	setInterval(run, 1000 * 60 * 15) // Every 15 minutes
+	const interval = setInterval(run, 1000 * 60 * 15) // Every 15 minutes
+	process.on('SIGINT', () => clearInterval(interval))
+	process.on('SIGTERM', () => clearInterval(interval))
 } else {
 	run()
 }
