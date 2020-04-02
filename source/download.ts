@@ -1,4 +1,3 @@
-import {promises as fsPromises} from 'fs'
 import childProcess from 'child_process'
 import util from 'util'
 
@@ -26,6 +25,6 @@ export async function download(video: string, captions: string | undefined, targ
 	const temporaryFile = 'tmp/' + filename
 	const command = downloadCommandLine(video, captions, temporaryFile)
 	const result = await exec(command)
-	await fsPromises.rename(temporaryFile, targetfolder + filename)
+	await exec(`mv ${temporaryFile} ${targetfolder + filename}`)
 	return result
 }
