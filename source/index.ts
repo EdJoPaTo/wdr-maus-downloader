@@ -41,6 +41,16 @@ async function checkZusatzsendung(): Promise<void> {
 	return sendWhenNew('zusatzsendung', img, mediaObjJson)
 }
 
+async function checkCorona(): Promise<void> {
+	const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/corona/'
+	const source = await request(BASE_URL)
+	const imgPart = /<img src=".+(imggen\/.+\.jpg)/.exec(source)![1]
+	const img = BASE_URL + imgPart
+
+	const mediaObjJson = await getMediaObjJson(source)
+	return sendWhenNew('corona', img, mediaObjJson)
+}
+
 async function getMediaObjJson(source: string): Promise<any> {
 	const mediaObjUrl = /mediaObj': { 'url': '(https:[^']+)/.exec(source)![1]
 	const mediaObjString = await request(mediaObjUrl)
@@ -126,6 +136,7 @@ async function saveMediaObj(filename: string, mediaObj: any): Promise<void> {
 async function run(): Promise<void> {
 	try {
 		await checkAktuelleSendung()
+		await checkCorona()
 		await checkZusatzsendung()
 	} catch (error) {
 		console.log(error)
