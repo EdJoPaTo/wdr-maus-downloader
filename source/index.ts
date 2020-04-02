@@ -92,10 +92,11 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	await download('https:' + normalVideo, captionsUrl ? 'https:' + captionsUrl : undefined, FILE_PATH, filenamePrefix + '2normal.mp4')
 	console.timeEnd('download 2normal')
 
-	// Disable temporarily
-	// console.time('download 3dgs')
-	// await download('https:' + dgsVideo, 'https:' + captionsUrl, FILE_PATH, filenamePrefix + '3dgs.mp4')
-	// console.timeEnd('download 3dgs')
+	if (dgsVideo) {
+		console.time('download 3dgs')
+		await download('https:' + dgsVideo, captionsUrl ? 'https:' + captionsUrl : undefined, FILE_PATH, filenamePrefix + '3dgs.mp4')
+		console.timeEnd('download 3dgs')
+	}
 
 	console.timeEnd('download')
 	await bot.telegram.sendMessage(TARGET_CHAT, 'finished download', Extra.inReplyTo(photoMessage.message_id) as any)
