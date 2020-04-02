@@ -38,21 +38,6 @@
         "error",
         "never"
       ]
-    },
-    "overrides": [
-      {
-        "files": [
-          "index.*"
-        ],
-        "rules": {
-          "camelcase": [
-            "warn",
-            {
-              "properties": "never"
-            }
-          ]
-        }
-      }
-    ]
+    }
   }
 }
