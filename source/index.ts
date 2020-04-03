@@ -1,4 +1,4 @@
-import {existsSync, readFileSync, createWriteStream, promises as fsPromises} from 'fs'
+import {existsSync, readFileSync, readdirSync, statSync, createWriteStream, promises as fsPromises} from 'fs'
 
 import request from 'request-promise-native'
 import Telegraf, {Extra} from 'telegraf'
@@ -105,7 +105,29 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	}
 
 	console.timeEnd('download')
-	await bot.telegram.sendMessage(TARGET_CHAT, 'finished download', Extra.inReplyTo(photoMessage.message_id) as any)
+
+	const relevantFiles = readdirSync(FILE_PATH)
+		.filter(o => o.startsWith(filenamePrefix))
+
+	let finishedReportMessage = 'finished download\n\n'
+	finishedReportMessage += relevantFiles
+		.map(o => `${humanReadableFilesize(FILE_PATH + o)} ${o}`)
+		.join('\n')
+
+	await bot.telegram.sendMessage(TARGET_CHAT, finishedReportMessage, Extra.inReplyTo(photoMessage.message_id) as any)
+}
+
+function humanReadableFilesize(path: string): string {
+	const {size} = statSync(path)
+	let rest = size
+	let unit = 0
+	while (rest > 1000) {
+		rest /= 1000
+		unit += 1
+	}
+
+	const unitString = ['', 'k', 'M', 'G'][unit]
+	return `${rest.toFixed(1)}${unitString}B`
 }
 
 function captionInfoEntry(label: string | undefined, content: string | undefined): string | undefined {
