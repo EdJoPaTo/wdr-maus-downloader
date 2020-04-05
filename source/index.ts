@@ -100,7 +100,7 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 
 	if (mediaInformation.videoDgs) {
 		console.time('download 3dgs')
-		await download(mediaInformation.videoDgs, mediaInformation.captionsSrt, FILE_PATH, filenamePrefix + '2normal.mp4')
+		await download(mediaInformation.videoDgs, mediaInformation.captionsSrt, FILE_PATH, filenamePrefix + '3dgs.mp4')
 		console.timeEnd('download 3dgs')
 	}
 
