@@ -122,8 +122,9 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 		.filter(o => o.startsWith(filenamePrefix))
 
 	let finishedReportMessage = 'finished download\n\n'
+	finishedReportMessage += filenamePrefix + '\n'
 	finishedReportMessage += relevantFiles
-		.map(o => `${humanReadableFilesize(FILE_PATH + o)} ${o}`)
+		.map(o => `${humanReadableFilesize(FILE_PATH + o)} ${o.slice(filenamePrefix.length)}`)
 		.join('\n')
 
 	await bot.telegram.sendMessage(TARGET_CHAT, finishedReportMessage, Extra.inReplyTo(photoMessage.message_id) as any)
