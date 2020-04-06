@@ -27,7 +27,7 @@ async function checkAktuelleSendung(): Promise<void> {
 
 	const mediaObjJson = await getMediaObjJson(source)
 
-	return sendWhenNew('aktuelle-sendung', img, mediaObjJson)
+	return sendWhenNew('AktuelleSendung', img, mediaObjJson)
 }
 
 async function checkZusatzsendung(): Promise<void> {
@@ -38,7 +38,7 @@ async function checkZusatzsendung(): Promise<void> {
 
 	const mediaObjJson = await getMediaObjJson(source)
 
-	return sendWhenNew('zusatzsendung', img, mediaObjJson)
+	return sendWhenNew('Zusatzsendung', img, mediaObjJson)
 }
 
 async function checkCorona(): Promise<void> {
@@ -48,7 +48,7 @@ async function checkCorona(): Promise<void> {
 	const img = BASE_URL + imgPart
 
 	const mediaObjJson = await getMediaObjJson(source)
-	return sendWhenNew('corona', img, mediaObjJson)
+	return sendWhenNew('Corona', img, mediaObjJson)
 }
 
 async function getMediaObjJson(source: string): Promise<any> {
@@ -67,9 +67,16 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	}
 
 	const mediaInformation = mediaInformationFromMediaObjectJson(mediaObjJson)
-	const filenamePrefix = 'wdrmaus-' + context + '-' + mediaInformation.airtimeISO + '-'
+	const filenamePrefix = 'WDRMaus-' + context + '-' + mediaInformation.airtimeISO + '-'
 
-	const caption = [
+	let finalCaption = ''
+	finalCaption += mediaInformation.title
+	finalCaption += '\n'
+	finalCaption += mediaInformation.airtime
+	finalCaption += ' '
+	finalCaption += '#' + context
+
+	const captionLines = [
 		captionInfoEntry(undefined, context),
 		captionInfoEntry('Title', mediaInformation.title),
 		captionInfoEntry('Airtime', mediaInformation.airtime),
@@ -79,6 +86,11 @@ async function sendWhenNew(context: string, img: string, mediaObjJson: any): Pro
 	]
 		.filter(o => o)
 		.join('\n')
+
+	let caption = ''
+	caption += finalCaption
+	caption += '\n\n'
+	caption += captionLines
 
 	const photoMessage = await bot.telegram.sendPhoto(TARGET_CHAT, img, new Extra({
 		caption
