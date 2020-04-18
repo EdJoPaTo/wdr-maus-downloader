@@ -14,12 +14,12 @@ export async function sync(): Promise<void> {
 	await resilio.syncConfig(rslconfig, (code, signal) => {
 		console.log('resilio sync stopped', code, signal)
 	})
+
+	process.on('SIGINT', stop)
+	process.on('SIGTERM', stop)
 }
 
 function stop(): void {
 	console.log('stop resilio…')
 	resilio.stop()
 }
-
-process.on('SIGINT', stop)
-process.on('SIGTERM', stop)
