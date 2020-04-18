@@ -5,15 +5,16 @@
     "node": ">=12"
   },
   "dependencies": {
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.5",
-    "resilio-sync": "^0.1.0",
+    "array-filter-unique": "^2.2.0",
+    "got": "^10.7.0",
+    "json-stable-stringify": "^1.0.1",
+    "resilio-sync": "^1.0.0",
     "telegraf": "^3.24.0"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.7.0",
+    "@types/json-stable-stringify": "^1.0.32",
     "@types/node": "^13.7.1",
-    "@types/request-promise-native": "^1.0.17",
     "del-cli": "^3.0.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.7.2",
@@ -28,8 +29,9 @@
   "xo": {
     "semicolon": false,
     "rules": {
-      "@typescript-eslint/no-unsafe-return": "warn",
-      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/prefer-readonly-parameter-types": "off",
       "prefer-named-capture-group": "off",
       "unicorn/prevent-abbreviations": "off"
     }

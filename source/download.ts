@@ -14,7 +14,7 @@ function downloadCommandLine(video: string, captions: string | undefined, target
 	command += ' -codec:v h264'
 	if (process.env.NODE_ENV !== 'production') {
 		// Only 15 seconds for faster finish
-		command += ' -t 0:15'
+		command += ' -t 0:05'
 	}
 
 	command += ` "${targetfile}"`
