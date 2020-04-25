@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "array-filter-unique": "^2.2.0",
-    "got": "^10.7.0",
+    "got": "^11.0.2",
     "json-stable-stringify": "^1.0.1",
     "resilio-sync": "^1.0.0",
     "telegraf": "^3.24.0"
