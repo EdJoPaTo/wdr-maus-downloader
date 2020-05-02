@@ -19,7 +19,7 @@ export async function sync(): Promise<void> {
 	process.on('SIGTERM', stop)
 }
 
-function stop(): void {
+async function stop(): Promise<void> {
 	console.log('stop resilio…')
-	resilio.stop()
+	await resilio.stop()
 }

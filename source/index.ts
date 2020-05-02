@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {existsSync, readFileSync} from 'fs'
 
 import Telegraf, {Extra} from 'telegraf'
