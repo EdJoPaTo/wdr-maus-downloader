@@ -35,4 +35,4 @@ COPY --from=node-builder /build/node_modules ./node_modules
 COPY resilio-config.json ./
 COPY --from=node-builder /build/dist ./
 
-CMD node index.js
+CMD node --unhandled-rejections=strict index.js
