@@ -1,4 +1,4 @@
-FROM node:12-buster AS node-builder
+FROM node:14-buster AS node-builder
 WORKDIR /build
 
 COPY package.json package-lock.json tsconfig.json ./
@@ -13,7 +13,7 @@ RUN rm -rf node_modules && npm ci --production
 FROM resilio/sync AS rslsync
 
 
-FROM node:12-buster
+FROM node:14-buster
 
 # Expose Resilio listening Port
 # (randomly selected in order to differ from the rslsync container default 55555)
