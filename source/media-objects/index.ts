@@ -30,7 +30,7 @@ export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 
 async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaObject}: Entry): Promise<void> {
 	const mediaInformation = mediaInformationFromMediaObjectJson(mediaObject)
-	const filenamePrefix = 'WDRMaus-' + context + '-' + mediaInformation.airtimeISO + '-'
+	const filenamePrefix = ['WDRMaus', context, mediaInformation.airtimeISO, mediaInformation.uniqueId, ''].join('-')
 
 	let finalCaption = ''
 	finalCaption += mediaInformation.title

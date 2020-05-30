@@ -1,4 +1,5 @@
 export interface MediaInformation {
+	uniqueId: string;
 	title: string;
 	airtime: string;
 	airtimeISO: string;
@@ -15,6 +16,7 @@ export function parseMediaObjectJson(source: string): any {
 }
 
 export function mediaInformationFromMediaObjectJson(mediaObjectJson: any): MediaInformation {
+	const uniqueId: string = mediaObjectJson.trackerData.trackerClipId
 	const title: string = mediaObjectJson.trackerData.trackerClipTitle
 	const airtime: string = mediaObjectJson.trackerData.trackerClipAirTime
 	const airtimeISO = parseAirtimeToISO(airtime)
@@ -24,6 +26,7 @@ export function mediaInformationFromMediaObjectJson(mediaObjectJson: any): Media
 	const captionsSrt: string | undefined = httpsPrefix(mediaObjectJson.mediaResource.captionsHash.srt)
 
 	return {
+		uniqueId,
 		title,
 		airtime,
 		airtimeISO,
