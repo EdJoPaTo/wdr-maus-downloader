@@ -28,6 +28,18 @@ async function getMediaObjectsFromSource(source: string): Promise<any[]> {
 		.map(o => parseMediaObjectJson(o.body))
 }
 
+function createEntries(context: Context, imageUrls: readonly string[], mediaObjects: readonly any[]): Entry[] {
+	if (mediaObjects.length !== imageUrls.length) {
+		throw new Error(`should find the same amount of images and video media objects ${imageUrls.length} != ${mediaObjects.length}`)
+	}
+
+	return imageUrls.map((o, i): Entry => ({
+		context,
+		imageUrl: o,
+		mediaObject: mediaObjects[i]
+	}))
+}
+
 async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> {
 	const context: Context = 'AktuelleSendung'
 	try {
@@ -40,17 +52,7 @@ async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> 
 			.map(o => BASE_URL + o)
 
 		const mediaObjects = await getMediaObjectsFromSource(body)
-		if (mediaObjects.length !== imageUrls.length) {
-			throw new Error(`should find the same amount of images and video media objects ${imageUrls.length} != ${mediaObjects.length}`)
-		}
-
-		return imageUrls.map((o, i) => {
-			return {
-				context,
-				imageUrl: o,
-				mediaObject: mediaObjects[i]
-			}
-		})
+		return createEntries(context, imageUrls, mediaObjects)
 	} catch (error) {
 		await errorHandler(context, error)
 		return []
@@ -68,17 +70,7 @@ async function getMausBlickClari(errorHandler: ErrorHandler): Promise<Entry[]> {
 			.map(o => BASE_URL + o)
 
 		const mediaObjects = await getMediaObjectsFromSource(body)
-		if (mediaObjects.length !== imageUrls.length) {
-			throw new Error(`should find the same amount of images and video media objects ${imageUrls.length} != ${mediaObjects.length}`)
-		}
-
-		return imageUrls.map((o, i) => {
-			return {
-				context,
-				imageUrl: o,
-				mediaObject: mediaObjects[i]
-			}
-		})
+		return createEntries(context, imageUrls, mediaObjects)
 	} catch (error) {
 		await errorHandler(context, error)
 		return []
