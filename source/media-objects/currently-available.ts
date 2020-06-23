@@ -4,7 +4,7 @@ import arrayFilterUnique from 'array-filter-unique'
 import {matchAll, sequentialAsync, ErrorHandler} from '../generics'
 import {parseMediaObjectJson} from './parse-media-obj'
 
-export type Context = 'AktuelleSendung' | 'MausBlickClari'
+export type Context = 'AktuelleSendung' | 'MausBlick'
 export interface Entry {
 	context: Context;
 	mediaObject: any;
@@ -14,7 +14,7 @@ export interface Entry {
 export async function getAll(errorHandler: ErrorHandler): Promise<Entry[]> {
 	return [
 		...await getAktuelleSendung(errorHandler),
-		...await getMausBlickClari(errorHandler)
+		...await getMausBlick(errorHandler)
 	]
 }
 
@@ -59,8 +59,8 @@ async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> 
 	}
 }
 
-async function getMausBlickClari(errorHandler: ErrorHandler): Promise<Entry[]> {
-	const context: Context = 'MausBlickClari'
+async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
+	const context: Context = 'MausBlick'
 	try {
 		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/mausblick/'
 		const {body} = await got(BASE_URL)
