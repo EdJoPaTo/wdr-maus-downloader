@@ -7,7 +7,7 @@ The episode can then manually uploaded to the public channel [@wdrMaus](https://
 This has to be manual for now as one episode is way bigger than the [file size limit for bots (currently 50 MB)](https://core.telegram.org/bots/api#sendvideo).
 Normal Users can send files up to 1.5 GB.
 
-The file will be added to a given [Resilio Sync](https://www.resilio.com/individuals/) Share where I can upload them from later.
+The files are added to the exposed VOLUME `/app/files`.
 
 
 ## Disclaimer
@@ -23,7 +23,5 @@ Mainly this is my own state of the sources.
 So this is not documented well.
 
 ### Docker Secrets that have to be set
-
-`resilio-share.txt`: The Resilio Sync Share secret (needs write access).
 
 `bot-token.txt`: The bot token of the Telegram Bot that is used.

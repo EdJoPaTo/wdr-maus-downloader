@@ -4,7 +4,7 @@ import jsonStableStringify from 'json-stable-stringify'
 
 type FileContent = readonly unknown[]
 
-const FILE_PATH = 'resilio-share/.downloaded/'
+const FILE_PATH = 'files/.downloaded/'
 mkdirSync(FILE_PATH, {recursive: true})
 
 function filepath(context: string): string {

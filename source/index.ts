@@ -5,11 +5,6 @@ import Telegraf, {Extra} from 'telegraf'
 
 import {doit as loadFromMediaObjects} from './media-objects'
 import {ERROR_TARGET} from './constants'
-import {sync} from './resilio'
-
-if (process.env.NODE_ENV === 'production') {
-	sync()
-}
 
 const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' : 'bot-token.txt'
 const token = readFileSync(tokenFilePath, 'utf8').trim()
@@ -34,10 +29,8 @@ async function run(): Promise<void> {
 }
 
 if (process.env.NODE_ENV === 'production') {
-	// Dont run immediately as resilio might need time to setup
-	const interval = setInterval(run, 1000 * 60 * 60) // Every 60 minutes
-	process.on('SIGINT', () => clearInterval(interval))
-	process.on('SIGTERM', () => clearInterval(interval))
+	// Dont run immediately as volume might need time to setup
+	setInterval(run, 1000 * 60 * 60) // Every 60 minutes
 } else {
 	run()
 }
