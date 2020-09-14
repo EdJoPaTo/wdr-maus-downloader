@@ -6,6 +6,8 @@ import Telegraf, {Extra} from 'telegraf'
 import {doit as loadFromMediaObjects} from './media-objects'
 import {ERROR_TARGET} from './constants'
 
+process.title = "wdrmaus-downloader"
+
 const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' : 'bot-token.txt'
 const token = readFileSync(tokenFilePath, 'utf8').trim()
 const bot = new Telegraf(token)
