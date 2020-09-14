@@ -30,7 +30,7 @@ async function run(): Promise<void> {
 
 if (process.env.NODE_ENV === 'production') {
 	// Dont run immediately as volume might need time to setup
-	setInterval(run, 1000 * 60 * 60) // Every 60 minutes
+	setInterval(run, 1000 * 60 * 35) // Every 35 minutes
 } else {
 	run()
 }
