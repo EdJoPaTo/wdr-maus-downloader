@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import {existsSync, readFileSync} from 'fs'
+import {existsSync, readFileSync, writeFileSync} from 'fs'
 
 import Telegraf, {Extra} from 'telegraf'
 
@@ -27,6 +27,7 @@ async function run(): Promise<void> {
 
 	await loadFromMediaObjects(bot.telegram, handleError)
 
+	writeFileSync('.last-successful-run', new Date().toISOString(), 'utf8')
 	currentlyRunning = false
 }
 
