@@ -18,10 +18,13 @@ VOLUME /app/tmp
 
 ENV NODE_ENV=production
 
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache bash ffmpeg
 
 COPY --from=node-builder /build/node_modules ./node_modules
 
 COPY --from=node-builder /build/dist ./
+
+HEALTHCHECK --interval=20m \
+    CMD bash -c '[[ $(find . -maxdepth 1 -name ".last-successful-run" -mmin "-100" -print | wc -l) == "1" ]]'
 
 CMD node --unhandled-rejections=strict index.js
