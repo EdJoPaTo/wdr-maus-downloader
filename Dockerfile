@@ -1,4 +1,4 @@
-FROM node:14-buster AS node-builder
+FROM node:14-alpine AS node-builder
 WORKDIR /build
 
 COPY package.json package-lock.json tsconfig.json ./
@@ -10,7 +10,7 @@ RUN npx tsc
 RUN rm -rf node_modules && npm ci --production
 
 
-FROM node:14-buster
+FROM node:14-alpine
 
 WORKDIR /app
 VOLUME /app/files
@@ -18,7 +18,7 @@ VOLUME /app/tmp
 
 ENV NODE_ENV=production
 
-RUN apt-get update && apt-get -y --no-install-recommends install ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ffmpeg
 
 COPY --from=node-builder /build/node_modules ./node_modules
 
