@@ -24,7 +24,7 @@ COPY --from=node-builder /build/node_modules ./node_modules
 
 COPY --from=node-builder /build/dist ./
 
-HEALTHCHECK --interval=25m \
-    CMD bash -c '[[ $(find . -maxdepth 1 -name ".last-successful-run" -mmin "-100" -print | wc -l) == "1" ]]'
+HEALTHCHECK --start-period=2h --interval=3m --retries=100 \
+    CMD bash -c '[[ $(find . -maxdepth 1 -name ".last-successful-run" -mmin "-300" -print | wc -l) == "1" ]]'
 
 CMD node --unhandled-rejections=strict index.js
