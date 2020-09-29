@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 
-import Telegraf, {Extra} from 'telegraf'
+import {Telegraf} from 'telegraf'
 
 import {doit as loadFromMediaObjects} from './media-objects'
 import {ERROR_TARGET} from './constants'
@@ -13,8 +13,20 @@ const token = readFileSync(tokenFilePath, 'utf8').trim()
 const bot = new Telegraf(token)
 
 async function handleError(context: string, error: any): Promise<void> {
-	console.log(error)
-	await bot.telegram.sendMessage(ERROR_TARGET, context + '\n```\n' + JSON.stringify(error, null, 2) + '\n```', Extra.markdown() as any)
+	console.error('ERROR', context, error)
+	let text = ''
+	text += 'context'
+	text += '\n'
+
+	if (error instanceof Error) {
+		text += error.name
+		text += ': '
+		text += error.message
+	} else {
+		text += String(error)
+	}
+
+	await bot.telegram.sendMessage(ERROR_TARGET, text)
 }
 
 let currentlyRunning = false
