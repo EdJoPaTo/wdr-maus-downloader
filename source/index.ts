@@ -15,7 +15,8 @@ const bot = new Telegraf(token)
 async function handleError(context: string, error: any): Promise<void> {
 	console.error('ERROR', context, error)
 	let text = ''
-	text += 'context'
+	text += 'Error in context: '
+	text += context
 	text += '\n'
 
 	if (error instanceof Error) {
