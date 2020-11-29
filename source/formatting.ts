@@ -9,7 +9,7 @@ export function humanReadableFilesize(path: string): string {
 		unit += 1
 	}
 
-	const unitString = ['', 'k', 'M', 'G'][unit]
+	const unitString = ['', 'k', 'M', 'G'][unit]!
 	return `${rest.toFixed(1)}${unitString}B`
 }
 

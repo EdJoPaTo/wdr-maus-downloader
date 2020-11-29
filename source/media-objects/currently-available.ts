@@ -20,7 +20,7 @@ export async function getAll(errorHandler: ErrorHandler): Promise<Entry[]> {
 
 async function getMediaObjectsFromSource(source: string): Promise<any[]> {
 	const allMediaUrls = matchAll(/(https:[^'"]+\d+\.js)/g, source)
-		.map(o => o[1])
+		.map(o => o[1]!)
 
 	const allResponses = await sequentialAsync(async url => got(url), allMediaUrls)
 
@@ -47,7 +47,7 @@ async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> 
 		const {body} = await got(BASE_URL)
 
 		const imageUrls = matchAll(/aktuelle-sendung\/([^"]+.jpg)/g, body)
-			.map(o => o[1])
+			.map(o => o[1]!)
 			.filter(arrayFilterUnique())
 			.map(o => BASE_URL + o)
 
@@ -66,7 +66,7 @@ async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
 		const {body} = await got(BASE_URL)
 
 		const imageUrls = matchAll(/<img src="(imggen\/.+\.jpg)/g, body)
-			.map(o => o[1])
+			.map(o => o[1]!)
 			.map(o => BASE_URL + o)
 
 		const mediaObjects = await getMediaObjectsFromSource(body)

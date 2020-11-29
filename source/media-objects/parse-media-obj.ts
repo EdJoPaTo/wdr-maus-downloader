@@ -46,5 +46,5 @@ function httpsPrefix(url: string | undefined): string | undefined {
 
 function parseAirtimeToISO(airtime: string): string {
 	const [day, month, year, hour, minute] = airtime.split(/[. :]/g)
-	return `${year}-${month}-${day}T${hour}-${minute}`
+	return `${year!}-${month!}-${day!}T${hour!}-${minute!}`
 }
