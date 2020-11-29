@@ -22,7 +22,7 @@ export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 	await sequentialAsync(async o => {
 		try {
 			await doMediaObjectStuff(telegram, o)
-		} catch (error) {
+		} catch (error: unknown) {
 			await errorHandler(o.context, error)
 		}
 	}, toBeDownloaded)

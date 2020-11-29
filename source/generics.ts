@@ -1,4 +1,4 @@
-export type ErrorHandler = (context: string, error: any) => Promise<void>
+export type ErrorHandler = (context: string, error: unknown) => Promise<void>
 
 export function matchAll(regex: Readonly<RegExp>, text: string): ReadonlyArray<Readonly<RegExpExecArray>> {
 	if (!regex.flags.includes('g')) {

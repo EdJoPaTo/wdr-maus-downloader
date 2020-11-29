@@ -12,7 +12,7 @@ const tokenFilePath = existsSync('/run/secrets') ? '/run/secrets/bot-token.txt' 
 const token = readFileSync(tokenFilePath, 'utf8').trim()
 const bot = new Telegraf(token)
 
-async function handleError(context: string, error: any): Promise<void> {
+async function handleError(context: string, error: unknown): Promise<void> {
 	console.error('ERROR', context, error)
 	let text = ''
 	text += 'Error in context: '

@@ -53,7 +53,7 @@ async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> 
 
 		const mediaObjects = await getMediaObjectsFromSource(body)
 		return createEntries(context, imageUrls, mediaObjects)
-	} catch (error) {
+	} catch (error: unknown) {
 		await errorHandler(context, error)
 		return []
 	}
@@ -71,7 +71,7 @@ async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
 
 		const mediaObjects = await getMediaObjectsFromSource(body)
 		return createEntries(context, imageUrls, mediaObjects)
-	} catch (error) {
+	} catch (error: unknown) {
 		await errorHandler(context, error)
 		return []
 	}
