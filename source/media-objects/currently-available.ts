@@ -4,7 +4,7 @@ import arrayFilterUnique from 'array-filter-unique'
 import {matchAll, sequentialAsync, ErrorHandler} from '../generics'
 import {parseMediaObjectJson} from './parse-media-obj'
 
-export type Context = 'AktuelleSendung' | 'MausBlick'
+export type Context = 'AktuelleSendung' | 'MausBlick' | 'Corona'
 export interface Entry {
 	context: Context;
 	mediaObject: any;
@@ -14,7 +14,8 @@ export interface Entry {
 export async function getAll(errorHandler: ErrorHandler): Promise<Entry[]> {
 	return [
 		...await getAktuelleSendung(errorHandler),
-		...await getMausBlick(errorHandler)
+		...await getMausBlick(errorHandler),
+		...await getCorona(errorHandler)
 	]
 }
 
@@ -66,6 +67,24 @@ async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
 		const {body} = await got(BASE_URL)
 
 		const imageUrls = matchAll(/<img src="(imggen\/.+\.jpg)/g, body)
+			.map(o => o[1]!)
+			.map(o => BASE_URL + o)
+
+		const mediaObjects = await getMediaObjectsFromSource(body)
+		return createEntries(context, imageUrls, mediaObjects)
+	} catch (error: unknown) {
+		await errorHandler(context, error)
+		return []
+	}
+}
+
+async function getCorona(errorHandler: ErrorHandler): Promise<Entry[]> {
+	const context: Context = 'Corona'
+	try {
+		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/corona/'
+		const {body} = await got(BASE_URL)
+
+		const imageUrls = matchAll(/<img src="..\/..\/..\/extras\/mausthemen\/corona\/(imggen\/.+\.jpg)/g, body)
 			.map(o => o[1]!)
 			.map(o => BASE_URL + o)
 
