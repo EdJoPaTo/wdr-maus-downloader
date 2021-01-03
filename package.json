@@ -17,7 +17,7 @@
     "del-cli": "^3.0.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.1.2",
-    "xo": "^0.35.0"
+    "xo": "^0.37.1"
   },
   "scripts": {
     "build": "del dist && tsc",
@@ -28,10 +28,8 @@
   "xo": {
     "semicolon": false,
     "rules": {
-      "unicorn/no-fn-reference-in-iterator": "off",
       "@typescript-eslint/prefer-readonly-parameter-types": "off",
-      "prefer-named-capture-group": "off",
-      "unicorn/prevent-abbreviations": "off"
+      "prefer-named-capture-group": "off"
     }
   }
 }
