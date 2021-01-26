@@ -1,7 +1,7 @@
 import {createWriteStream, readdirSync} from 'fs'
 
 import got from 'got'
-import {Extra, Telegram} from 'telegraf'
+import {Telegraf} from 'telegraf'
 
 import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded'
 import {captionInfoEntry, humanReadableFilesize} from '../formatting'
@@ -11,6 +11,8 @@ import {FILE_PATH, TARGET_CHAT} from '../constants'
 
 import {Entry, getAll} from './currently-available'
 import {mediaInformationFromMediaObjectJson} from './parse-media-obj'
+
+type Telegram = Telegraf['telegram']
 
 export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 	const entries = await getAll(errorHandler)
@@ -55,9 +57,7 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 	caption += '\n\n'
 	caption += captionLines
 
-	const photoMessage = await telegram.sendPhoto(TARGET_CHAT, imageUrl, new Extra({
-		caption
-	}).notifications(false) as any)
+	const photoMessage = await telegram.sendPhoto(TARGET_CHAT, imageUrl, {disable_notification: true, caption})
 
 	console.log(`start download ${context} ${mediaInformation.airtimeISO} ${mediaInformation.title}…`)
 	console.time('download')
@@ -88,6 +88,6 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 		.map(o => `${humanReadableFilesize(FILE_PATH + o)} ${o.slice(filenamePrefix.length)}`)
 		.join('\n')
 
-	await telegram.sendMessage(TARGET_CHAT, finishedReportMessage, Extra.inReplyTo(photoMessage.message_id) as any)
+	await telegram.sendMessage(TARGET_CHAT, finishedReportMessage, {reply_to_message_id: photoMessage.message_id})
 	addDownloaded(context, mediaObject)
 }
