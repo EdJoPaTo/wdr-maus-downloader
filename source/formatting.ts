@@ -12,18 +12,3 @@ export function humanReadableFilesize(path: string): string {
 	const unitString = ['', 'k', 'M', 'G'][unit]!
 	return `${rest.toFixed(1)}${unitString}B`
 }
-
-export function captionInfoEntry(label: string | undefined, content: string | undefined): string | undefined {
-	if (!content) {
-		return undefined
-	}
-
-	let result = ''
-	if (label) {
-		result += label
-		result += ': '
-	}
-
-	result += content
-	return result
-}

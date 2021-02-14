@@ -1,13 +1,14 @@
 import {createWriteStream, readdirSync} from 'fs'
 
-import got from 'got'
+import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/telegram-types'
 import {Telegraf} from 'telegraf'
+import got from 'got'
 
 import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded'
-import {captionInfoEntry, humanReadableFilesize} from '../formatting'
 import {download} from '../download'
 import {ErrorHandler, sequentialAsync} from '../generics'
-import {FILE_PATH, TARGET_CHAT} from '../constants'
+import {FILE_PATH, PUBLIC_TARGET_CHAT, META_TARGET_CHAT} from '../constants'
+import {humanReadableFilesize} from '../formatting'
 
 import {Entry, getAll} from './currently-available'
 import {mediaInformationFromMediaObjectJson} from './parse-media-obj'
@@ -41,23 +42,14 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 	finalCaption += ' '
 	finalCaption += '#' + context
 
-	const captionLines = [
-		captionInfoEntry(undefined, context),
-		captionInfoEntry('Title', mediaInformation.title),
-		captionInfoEntry('Airtime', mediaInformation.airtime),
-		captionInfoEntry('Video', mediaInformation.videoNormal),
-		captionInfoEntry('DGS', mediaInformation.videoDgs),
-		captionInfoEntry('Caption', mediaInformation.captionsSrt)
-	]
-		.filter(o => o)
-		.join('\n')
+	console.log()
+	console.log()
+	console.log('download now', context, 'Title:', mediaInformation.title, 'AirTime:', mediaInformation.airtime)
+	console.log('video', mediaInformation.videoNormal)
+	console.log('DGS', mediaInformation.videoDgs)
+	console.log('Caption', mediaInformation.captionsSrt)
 
-	let caption = ''
-	caption += finalCaption
-	caption += '\n\n'
-	caption += captionLines
-
-	const photoMessage = await telegram.sendPhoto(TARGET_CHAT, imageUrl, {disable_notification: true, caption})
+	const photoMessage = await telegram.sendPhoto(META_TARGET_CHAT, imageUrl, {disable_notification: true, caption: 'Start download...\n\n' + finalCaption})
 
 	console.log(`start download ${context} ${mediaInformation.airtimeISO} ${mediaInformation.title}…`)
 	console.time('download')
@@ -79,6 +71,22 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 
 	console.timeEnd('download')
 
+	if (telegram.options.apiRoot.includes('http://')) {
+		console.time('upload to TG')
+
+		const media: Array<InputMediaPhoto | InputMediaVideo> = [
+			{type: 'photo', media: imageUrl, caption: finalCaption},
+			{type: 'video', media: {source: FILE_PATH + filenamePrefix + '2normal.mp4'}}
+		]
+
+		if (mediaInformation.videoDgs) {
+			media.push({type: 'video', media: {source: FILE_PATH + filenamePrefix + '3dgs.mp4'}})
+		}
+
+		await telegram.sendMediaGroup(PUBLIC_TARGET_CHAT, media)
+		console.timeEnd('upload to TG')
+	}
+
 	const relevantFiles = readdirSync(FILE_PATH)
 		.filter(o => o.startsWith(filenamePrefix))
 
@@ -88,6 +96,6 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 		.map(o => `${humanReadableFilesize(FILE_PATH + o)} ${o.slice(filenamePrefix.length)}`)
 		.join('\n')
 
-	await telegram.sendMessage(TARGET_CHAT, finishedReportMessage, {reply_to_message_id: photoMessage.message_id})
+	await telegram.sendMessage(META_TARGET_CHAT, finishedReportMessage, {reply_to_message_id: photoMessage.message_id})
 	addDownloaded(context, mediaObject)
 }

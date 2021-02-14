@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 
-import {Telegraf} from 'telegraf'
+import {Telegraf, Context as TelegrafContext} from 'telegraf'
 
 import {doit as loadFromMediaObjects} from './media-objects'
-import {ERROR_TARGET} from './constants'
+import {META_TARGET_CHAT} from './constants'
 
 process.title = 'wdrmaus-downloader'
 
@@ -15,7 +15,14 @@ if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)')
 }
 
-const bot = new Telegraf(token)
+const telegrafOptions: Partial<Telegraf.Options<TelegrafContext>> = {}
+if (process.env.TELEGRAM_API_ROOT) {
+	telegrafOptions.telegram = {
+		apiRoot: process.env.TELEGRAM_API_ROOT
+	}
+}
+
+const bot = new Telegraf(token, telegrafOptions)
 
 async function handleError(context: string, error: unknown): Promise<void> {
 	console.error('ERROR', context, error)
@@ -32,7 +39,7 @@ async function handleError(context: string, error: unknown): Promise<void> {
 		text += String(error)
 	}
 
-	await bot.telegram.sendMessage(ERROR_TARGET, text)
+	await bot.telegram.sendMessage(META_TARGET_CHAT, text)
 }
 
 let currentlyRunning = false
