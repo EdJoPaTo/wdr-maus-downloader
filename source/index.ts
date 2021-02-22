@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 
 import {Telegraf, Context as TelegrafContext} from 'telegraf'
@@ -60,5 +59,6 @@ if (process.env.NODE_ENV === 'production') {
 	// Dont run immediately as volume might need time to setup
 	setInterval(run, 1000 * 60 * 35) // Every 35 minutes
 } else {
+	// eslint-disable-next-line @typescript-eslint/no-floating-promises
 	run()
 }
