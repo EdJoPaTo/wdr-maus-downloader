@@ -1,7 +1,7 @@
 import {createWriteStream, readdirSync} from 'fs'
 
 import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/telegram-types'
-import {Telegraf} from 'telegraf'
+import {Telegram} from 'telegraf'
 import got from 'got'
 
 import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded'
@@ -12,8 +12,6 @@ import {humanReadableFilesize} from '../formatting'
 
 import {Entry, getAll} from './currently-available'
 import {mediaInformationFromMediaObjectJson} from './parse-media-obj'
-
-type Telegram = Telegraf['telegram']
 
 export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 	const entries = await getAll(errorHandler)
