@@ -15,12 +15,18 @@ export function matchAll(regex: Readonly<RegExp>, text: string): ReadonlyArray<R
 	return results
 }
 
-export async function sequentialAsync<Argument, ReturnType>(func: (argument: Argument) => Promise<ReturnType>, missions: readonly Argument[]): Promise<readonly ReturnType[]> {
+export async function sequentialAsync<Argument, ReturnType>(func: (argument: Argument, index: number) => Promise<ReturnType>, missions: readonly Argument[]): Promise<readonly ReturnType[]> {
 	const result: ReturnType[] = []
 	for (const mission of missions) {
 		// eslint-disable-next-line no-await-in-loop
-		result.push(await func(mission))
+		result.push(await func(mission, result.length))
 	}
 
 	return result
+}
+
+export async function sleep(ms: number): Promise<void> {
+	await new Promise(resolve => {
+		setTimeout(resolve, ms)
+	})
 }

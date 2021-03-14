@@ -22,7 +22,4 @@ RUN install_packages ffmpeg
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/dist ./
 
-HEALTHCHECK --start-period=2h --interval=3m --retries=100 \
-    CMD bash -c '[[ $(find . -maxdepth 1 -name ".last-successful-run" -mmin "-300" -print | wc -l) == "1" ]]'
-
 CMD node --unhandled-rejections=strict -r source-map-support/register index.js

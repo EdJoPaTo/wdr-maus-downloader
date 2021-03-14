@@ -4,6 +4,7 @@ import {Telegraf, Context as TelegrafContext} from 'telegraf'
 
 import {doit as loadFromMediaObjects} from './media-objects'
 import {META_TARGET_CHAT} from './constants'
+import {sleep} from './generics'
 
 process.title = 'wdrmaus-downloader'
 
@@ -41,24 +42,31 @@ async function handleError(context: string, error: unknown): Promise<void> {
 	await bot.telegram.sendMessage(META_TARGET_CHAT, text)
 }
 
-let currentlyRunning = false
 async function run(): Promise<void> {
-	if (currentlyRunning) {
-		return
-	}
-
-	currentlyRunning = true
-
 	await loadFromMediaObjects(bot.telegram, handleError)
-
 	writeFileSync('.last-successful-run', new Date().toISOString(), 'utf8')
-	currentlyRunning = false
 }
 
-if (process.env.NODE_ENV === 'production') {
-	// Dont run immediately as volume might need time to setup
-	setInterval(run, 1000 * 60 * 35) // Every 35 minutes
-} else {
-	// eslint-disable-next-line @typescript-eslint/no-floating-promises
-	run()
+async function startup(): Promise<void> {
+	if (process.env.NODE_ENV === 'production') {
+		// Dont run immediately as volume might need time to setup
+		await sleep(1000 * 60 * 10) // 10 minutes
+
+		while (true) {
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				await run()
+			} catch (error: unknown) {
+				console.error('main run procedure failed', error)
+			}
+
+			// eslint-disable-next-line no-await-in-loop
+			await sleep(1000 * 60 * 35) // Every 35 minutes
+		}
+	} else {
+		await run()
+	}
 }
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+startup()
