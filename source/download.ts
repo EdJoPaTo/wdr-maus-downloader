@@ -1,7 +1,7 @@
-import childProcess from 'child_process'
-import util from 'util'
+import * as childProcess from 'child_process'
+import {promisify} from 'util'
 
-const exec = util.promisify(childProcess.exec)
+const exec = promisify(childProcess.exec)
 
 function downloadCommandLine(video: string, captions: string | undefined, targetfile: string): string {
 	let command = 'nice ffmpeg -y -v error'

@@ -1,6 +1,6 @@
 import {readFileSync, writeFileSync, mkdirSync} from 'fs'
 
-import jsonStableStringify from 'json-stable-stringify'
+import * as jsonStableStringify from 'json-stable-stringify'
 
 type FileContent = readonly unknown[]
 
