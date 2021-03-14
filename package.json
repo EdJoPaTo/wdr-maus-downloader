@@ -8,6 +8,7 @@
     "array-filter-unique": "^2.2.0",
     "got": "^11.0.2",
     "json-stable-stringify": "^1.0.1",
+    "source-map-support": "^0.5.19",
     "telegraf": "^4.1.1"
   },
   "devDependencies": {
