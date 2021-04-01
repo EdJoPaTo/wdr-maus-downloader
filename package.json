@@ -6,6 +6,7 @@
 		"start": "ts-node source/index.ts",
 		"test": "tsc --sourceMap && xo"
 	},
+	"type": "commonjs",
 	"engines": {
 		"node": ">=14"
 	},
@@ -17,7 +18,7 @@
 		"telegraf": "^4.3.0"
 	},
 	"devDependencies": {
-		"@sindresorhus/tsconfig": "^0.8.0",
+		"@sindresorhus/tsconfig": "^1.0.1",
 		"@types/json-stable-stringify": "^1.0.32",
 		"@types/node": "^14.0.27",
 		"del-cli": "^3.0.0",
@@ -28,6 +29,7 @@
 	"xo": {
 		"semicolon": false,
 		"rules": {
+			"@typescript-eslint/dot-notation": "off",
 			"@typescript-eslint/prefer-readonly-parameter-types": "off",
 			"prefer-named-capture-group": "off"
 		}

@@ -10,15 +10,15 @@ process.title = 'wdrmaus-downloader'
 
 const token = (existsSync('/run/secrets/bot-token.txt') && readFileSync('/run/secrets/bot-token.txt', 'utf8').trim()) ||
 	(existsSync('bot-token.txt') && readFileSync('bot-token.txt', 'utf8').trim()) ||
-	process.env.BOT_TOKEN
+	process.env['BOT_TOKEN']
 if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)')
 }
 
 const telegrafOptions: Partial<Telegraf.Options<TelegrafContext>> = {}
-if (process.env.TELEGRAM_API_ROOT) {
+if (process.env['TELEGRAM_API_ROOT']) {
 	telegrafOptions.telegram = {
-		apiRoot: process.env.TELEGRAM_API_ROOT
+		apiRoot: process.env['TELEGRAM_API_ROOT']
 	}
 }
 
@@ -48,7 +48,7 @@ async function run(): Promise<void> {
 }
 
 async function startup(): Promise<void> {
-	if (process.env.NODE_ENV === 'production') {
+	if (process.env['NODE_ENV'] === 'production') {
 		// Dont run immediately as volume might need time to setup
 		await sleep(1000 * 60 * 10) // 10 minutes
 
