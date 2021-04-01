@@ -9,7 +9,7 @@
     "got": "^11.0.2",
     "json-stable-stringify": "^1.0.1",
     "source-map-support": "^0.5.19",
-    "telegraf": "^4.1.1"
+    "telegraf": "^4.3.0"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.8.0",

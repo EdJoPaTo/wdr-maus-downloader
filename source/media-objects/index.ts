@@ -1,6 +1,6 @@
 import {createWriteStream, readdirSync} from 'fs'
 
-import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/telegram-types'
+import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/core/types/typegram'
 import {Telegram} from 'telegraf'
 import got from 'got'
 
