@@ -9,5 +9,4 @@ botfather-settings/*.png
 .last-successful-run
 bot-token.txt
 files
-resilio-share
 tmp
