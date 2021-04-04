@@ -2,9 +2,9 @@ import {existsSync, readFileSync, writeFileSync} from 'fs'
 
 import {Telegraf, Context as TelegrafContext} from 'telegraf'
 
-import {doit as loadFromMediaObjects} from './media-objects'
-import {META_TARGET_CHAT} from './constants'
-import {sleep} from './generics'
+import {doit as loadFromMediaObjects} from './media-objects/index.js'
+import {META_TARGET_CHAT} from './constants.js'
+import {sleep} from './generics.js'
 
 process.title = 'wdrmaus-downloader'
 

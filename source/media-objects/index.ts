@@ -4,14 +4,14 @@ import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/core/types/type
 import {Telegram} from 'telegraf'
 import got from 'got'
 
-import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded'
-import {download} from '../download'
-import {ErrorHandler, sequentialAsync} from '../generics'
-import {FILE_PATH, PUBLIC_TARGET_CHAT, META_TARGET_CHAT} from '../constants'
-import {humanReadableFilesize} from '../formatting'
+import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded.js'
+import {download} from '../download.js'
+import {ErrorHandler, sequentialAsync} from '../generics.js'
+import {FILE_PATH, PUBLIC_TARGET_CHAT, META_TARGET_CHAT} from '../constants.js'
+import {humanReadableFilesize} from '../formatting.js'
 
-import {Entry, getAll} from './currently-available'
-import {mediaInformationFromMediaObjectJson} from './parse-media-obj'
+import {Entry, getAll} from './currently-available.js'
+import {mediaInformationFromMediaObjectJson} from './parse-media-obj.js'
 
 export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 	const entries = await getAll(errorHandler)

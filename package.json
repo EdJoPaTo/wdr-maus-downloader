@@ -3,10 +3,10 @@
 	"license": "MIT",
 	"scripts": {
 		"build": "del-cli dist && tsc",
-		"start": "ts-node source/index.ts",
+		"start": "node --loader ts-node/esm source/index.ts",
 		"test": "tsc --sourceMap && xo"
 	},
-	"type": "commonjs",
+	"type": "module",
 	"engines": {
 		"node": ">=14"
 	},
@@ -31,7 +31,11 @@
 		"rules": {
 			"@typescript-eslint/dot-notation": "off",
 			"@typescript-eslint/prefer-readonly-parameter-types": "off",
-			"prefer-named-capture-group": "off"
+			"prefer-named-capture-group": "off",
+			"import/extensions": [
+				"error",
+				"ignorePackages"
+			]
 		}
 	}
 }

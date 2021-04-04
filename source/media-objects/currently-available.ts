@@ -1,8 +1,9 @@
 import got from 'got'
 import arrayFilterUnique from 'array-filter-unique'
 
-import {matchAll, sequentialAsync, ErrorHandler} from '../generics'
-import {parseMediaObjectJson} from './parse-media-obj'
+import {matchAll, sequentialAsync, ErrorHandler} from '../generics.js'
+
+import {parseMediaObjectJson} from './parse-media-obj.js'
 
 export type Context = 'AktuelleSendung' | 'MausBlick' | 'Corona'
 export interface Entry {

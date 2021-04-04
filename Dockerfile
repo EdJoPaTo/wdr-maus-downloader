@@ -19,6 +19,7 @@ ENV NODE_ENV=production
 
 RUN install_packages ffmpeg
 
+COPY package.json ./
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/dist ./
 
