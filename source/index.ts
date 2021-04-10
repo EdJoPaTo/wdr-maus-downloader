@@ -60,8 +60,19 @@ async function startup(): Promise<void> {
 				console.error('main run procedure failed', error)
 			}
 
-			// eslint-disable-next-line no-await-in-loop
-			await sleep(1000 * 60 * 35) // Every 35 minutes
+			const now = new Date()
+			const isSunday = now.getDay() === 0
+			const hour = now.getHours()
+			if (isSunday && hour >= 7 && hour <= 12) {
+				// eslint-disable-next-line no-await-in-loop
+				await sleep(1000 * 60 * 42) // Every 42 minutes
+			} else if (isSunday && hour >= 2 && hour <= 12) {
+				// eslint-disable-next-line no-await-in-loop
+				await sleep(1000 * 60 * 60 * 2.123) // Every 2 hours and a bit (in order not to miss the normal operation sunday window)
+			} else {
+				// eslint-disable-next-line no-await-in-loop
+				await sleep(1000 * 60 * 60 * 8.123) // Every 8 hours and a bit
+			}
 		}
 	} else {
 		await run()
