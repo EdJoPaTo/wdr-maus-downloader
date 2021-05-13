@@ -14,18 +14,23 @@ COPY package.json package-lock.json ./
 RUN npm ci --production
 
 
-FROM docker.io/library/fedora
+# ffmpeg versions
+# alpine:3.13           4.3.1
+# alpine:edge           4.4
+# node:14-alpine        4.2.4
+# node:14-alpine3.13    4.3.1
+# node:16-alpine        4.3.1
+
+FROM docker.io/library/alpine:edge
 WORKDIR /app
 VOLUME /app/files
 VOLUME /app/tmp
 
 ENV NODE_ENV=production
 
-RUN dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-34.noarch.rpm \
-    && dnf install -y ffmpeg nodejs \
-    && dnf clean all  \
-    && rm -rf /var/cache/yum  \
-    && rm -rf /var/lib/yum/* /var/log/yum.log
+RUN apk --no-cache upgrade \
+    && apk --no-cache add ffmpeg nodejs \
+    && ffmpeg -version
 
 COPY package.json ./
 COPY --from=packages /build/node_modules ./node_modules
