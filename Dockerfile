@@ -22,15 +22,14 @@ RUN npm ci --production
 # node:16-alpine        4.3.1
 
 FROM docker.io/library/alpine:edge
-WORKDIR /app
-VOLUME /app/files
-VOLUME /app/tmp
-
 ENV NODE_ENV=production
-
 RUN apk --no-cache upgrade \
     && apk --no-cache add ffmpeg nodejs \
     && ffmpeg -version
+
+WORKDIR /app
+VOLUME /app/files
+VOLUME /app/tmp
 
 COPY package.json ./
 COPY --from=packages /build/node_modules ./node_modules
