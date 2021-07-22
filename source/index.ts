@@ -1,4 +1,4 @@
-import {existsSync, readFileSync, writeFileSync} from 'fs'
+import {writeFileSync} from 'fs'
 
 import {Telegraf, Context as TelegrafContext} from 'telegraf'
 
@@ -8,9 +8,7 @@ import {sleep} from './generics.js'
 
 process.title = 'wdrmaus-downloader'
 
-const token = (existsSync('/run/secrets/bot-token.txt') && readFileSync('/run/secrets/bot-token.txt', 'utf8').trim()) ||
-	(existsSync('bot-token.txt') && readFileSync('bot-token.txt', 'utf8').trim()) ||
-	process.env['BOT_TOKEN']
+const token = process.env['BOT_TOKEN']
 if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)')
 }
@@ -18,7 +16,7 @@ if (!token) {
 const telegrafOptions: Partial<Telegraf.Options<TelegrafContext>> = {}
 if (process.env['TELEGRAM_API_ROOT']) {
 	telegrafOptions.telegram = {
-		apiRoot: process.env['TELEGRAM_API_ROOT']
+		apiRoot: process.env['TELEGRAM_API_ROOT'],
 	}
 }
 

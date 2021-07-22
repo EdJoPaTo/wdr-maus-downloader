@@ -74,7 +74,7 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 
 		const media: Array<InputMediaPhoto | InputMediaVideo> = [
 			{type: 'photo', media: imageUrl, caption: finalCaption},
-			{type: 'video', media: {source: FILE_PATH + filenamePrefix + '2normal.mp4'}}
+			{type: 'video', media: {source: FILE_PATH + filenamePrefix + '2normal.mp4'}},
 		]
 
 		if (mediaInformation.videoDgs) {

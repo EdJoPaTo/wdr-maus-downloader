@@ -32,7 +32,7 @@ export function mediaInformationFromMediaObjectJson(mediaObjectJson: any): Media
 		airtimeISO,
 		videoNormal,
 		videoDgs,
-		captionsSrt
+		captionsSrt,
 	}
 }
 

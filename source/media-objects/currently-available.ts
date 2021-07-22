@@ -16,7 +16,7 @@ export async function getAll(errorHandler: ErrorHandler): Promise<Entry[]> {
 	return [
 		...await getAktuelleSendung(errorHandler),
 		...await getMausBlick(errorHandler),
-		...await getCorona(errorHandler)
+		...await getCorona(errorHandler),
 	]
 }
 
@@ -38,7 +38,7 @@ function createEntries(context: Context, imageUrls: readonly string[], mediaObje
 	return imageUrls.map((o, i): Entry => ({
 		context,
 		imageUrl: o,
-		mediaObject: mediaObjects[i]
+		mediaObject: mediaObjects[i],
 	}))
 }
 
