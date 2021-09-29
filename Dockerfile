@@ -16,16 +16,20 @@ RUN npm ci --production
 
 # ffmpeg versions
 # alpine:3.13           4.3.1
+# alpine:3.14           4.4
 # alpine:edge           4.4
 # node:14-alpine        4.2.4
 # node:14-alpine3.13    4.3.1
+# node:14-alpine3.14    4.4
 # node:16-alpine        4.3.1
+# node:16-alpine3.14    4.4
 
-FROM docker.io/library/alpine:edge
+FROM docker.io/library/alpine:3.14
 ENV NODE_ENV=production
 RUN apk --no-cache upgrade \
     && apk --no-cache add ffmpeg nodejs \
-    && ffmpeg -version
+    && ffmpeg -version \
+    && node --version
 
 WORKDIR /app
 VOLUME /app/files
