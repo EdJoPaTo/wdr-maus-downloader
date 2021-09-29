@@ -1,6 +1,6 @@
 import {writeFileSync} from 'fs'
 
-import {Telegraf, Context as TelegrafContext} from 'telegraf'
+import {Bot} from 'grammy'
 
 import {doit as loadFromMediaObjects} from './media-objects/index.js'
 import {META_TARGET_CHAT} from './constants.js'
@@ -13,14 +13,11 @@ if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)')
 }
 
-const telegrafOptions: Partial<Telegraf.Options<TelegrafContext>> = {}
-if (process.env['TELEGRAM_API_ROOT']) {
-	telegrafOptions.telegram = {
+const bot = new Bot(token, {
+	client: {
 		apiRoot: process.env['TELEGRAM_API_ROOT'],
-	}
-}
-
-const bot = new Telegraf(token, telegrafOptions)
+	},
+})
 
 async function handleError(context: string, error: unknown): Promise<void> {
 	console.error('ERROR', context, error)
@@ -37,11 +34,11 @@ async function handleError(context: string, error: unknown): Promise<void> {
 		text += String(error)
 	}
 
-	await bot.telegram.sendMessage(META_TARGET_CHAT, text)
+	await bot.api.sendMessage(META_TARGET_CHAT, text)
 }
 
 async function run(): Promise<void> {
-	await loadFromMediaObjects(bot.telegram, handleError)
+	await loadFromMediaObjects(bot.api, handleError)
 	writeFileSync('.last-successful-run', new Date().toISOString(), 'utf8')
 }
 

@@ -1,7 +1,7 @@
 import {createWriteStream, readdirSync} from 'fs'
 
-import {InputMediaPhoto, InputMediaVideo} from 'telegraf/typings/core/types/typegram'
-import {Telegram} from 'telegraf'
+import {Api as Telegram, InputFile} from 'grammy'
+import {InputMediaPhoto, InputMediaVideo} from 'grammy/out/platform'
 import got from 'got'
 
 import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded.js'
@@ -69,16 +69,16 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 
 	console.timeEnd('download')
 
-	if (telegram.options.apiRoot.includes('http://')) {
+	if (process.env['TELEGRAM_API_ROOT']?.includes('http://')) {
 		console.time('upload to TG')
 
 		const media: Array<InputMediaPhoto | InputMediaVideo> = [
 			{type: 'photo', media: imageUrl, caption: finalCaption},
-			{type: 'video', media: {source: FILE_PATH + filenamePrefix + '2normal.mp4'}},
+			{type: 'video', media: new InputFile(FILE_PATH + filenamePrefix + '2normal.mp4')},
 		]
 
 		if (mediaInformation.videoDgs) {
-			media.push({type: 'video', media: {source: FILE_PATH + filenamePrefix + '3dgs.mp4'}})
+			media.push({type: 'video', media: new InputFile(FILE_PATH + filenamePrefix + '3dgs.mp4')})
 		}
 
 		await telegram.sendMediaGroup(PUBLIC_TARGET_CHAT, media)
