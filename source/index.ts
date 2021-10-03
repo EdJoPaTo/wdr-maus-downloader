@@ -47,6 +47,7 @@ async function startup(): Promise<void> {
 		// Dont run immediately as volume might need time to setup
 		await sleep(1000 * 60 * 10) // 10 minutes
 
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			try {
 				// eslint-disable-next-line no-await-in-loop

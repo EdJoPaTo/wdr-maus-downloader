@@ -24,13 +24,13 @@
 		"del-cli": "^4.0.0",
 		"ts-node": "^10.0.0",
 		"typescript": "^4.2.2",
-		"xo": "^0.44.0"
+		"xo": "^0.45.0"
 	},
 	"xo": {
 		"semicolon": false,
 		"rules": {
+			"@typescript-eslint/naming-convention": "off",
 			"@typescript-eslint/no-unsafe-assignment": "off",
-			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unsafe-return": "off",
 			"@typescript-eslint/prefer-readonly-parameter-types": "off",
 			"node/prefer-global/process": "off",
