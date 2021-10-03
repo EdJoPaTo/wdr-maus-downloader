@@ -1,3 +1,4 @@
+import {Agent} from 'http'
 import {writeFileSync} from 'fs'
 
 import {ApiClientOptions, Bot} from 'grammy'
@@ -17,6 +18,10 @@ const client: ApiClientOptions = {}
 const apiRoot = process.env['TELEGRAM_API_ROOT']
 if (apiRoot) {
 	client.apiRoot = apiRoot
+	client.baseFetchConfig = {
+		compress: true,
+		agent: new Agent({ keepAlive: true }),
+	}
 }
 
 const bot = new Bot(token, {client})
