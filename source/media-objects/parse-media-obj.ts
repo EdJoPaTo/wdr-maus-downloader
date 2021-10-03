@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 export interface MediaInformation {
 	uniqueId: string;
 	title: string;

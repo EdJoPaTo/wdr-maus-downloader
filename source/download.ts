@@ -1,7 +1,4 @@
-import * as childProcess from 'child_process';
-import {promisify} from 'util';
-
-const exec = promisify(childProcess.exec);
+import { exec } from "https://deno.land/x/exec/mod.ts";
 
 function downloadCommandLine(video: string, captions: string | undefined, targetfile: string): string {
 	let command = 'nice ffmpeg -y -v error';
@@ -10,9 +7,9 @@ function downloadCommandLine(video: string, captions: string | undefined, target
 		command += ` -i "${captions}"`;
 	}
 
-	command += ' -c copy  -c:s mov_text';
-	command += ' -codec:v h264';
-	if (process.env['NODE_ENV'] !== 'production') {
+	command += ' -c copy  -c:s mov_text'
+	command += ' -codec:v h264'
+	if (Deno.env.get('NODE_ENV') !== 'production') {
 		// Only 15 seconds for faster finish
 		command += ' -t 0:05';
 	}

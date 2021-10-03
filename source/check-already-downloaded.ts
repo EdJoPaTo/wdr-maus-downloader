@@ -1,11 +1,9 @@
-import {readFileSync, writeFileSync, mkdirSync} from 'fs';
-
-import jsonStableStringify from 'json-stable-stringify';
+import jsonStableStringify from 'https://esm.sh/json-stable-stringify'
 
 type FileContent = readonly unknown[];
 
-const FILE_PATH = 'files/.downloaded/';
-mkdirSync(FILE_PATH, {recursive: true});
+const FILE_PATH = 'files/.downloaded/'
+Deno.mkdirSync(FILE_PATH, {recursive: true})
 
 function filepath(context: string): string {
 	return `${FILE_PATH}${context}.json`;
@@ -13,15 +11,15 @@ function filepath(context: string): string {
 
 function loadFile(context: string): FileContent {
 	try {
-		return JSON.parse(readFileSync(filepath(context), 'utf8')) as FileContent;
+		return JSON.parse(Deno.readTextFileSync(filepath(context))) as FileContent
 	} catch {
 		return [];
 	}
 }
 
 function writeFile(context: string, content: FileContent): void {
-	const stringContent = jsonStableStringify(content, {space: '\t'});
-	writeFileSync(filepath(context), stringContent, 'utf8');
+	const stringContent = jsonStableStringify(content, {space: '\t'})
+	Deno.writeTextFileSync(filepath(context), stringContent)
 }
 
 export function hasAlreadyDownloaded(context: string, stuff: unknown): boolean {

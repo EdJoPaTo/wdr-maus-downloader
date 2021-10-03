@@ -1,17 +1,16 @@
-import {createWriteStream, readdirSync} from 'fs';
+import {Api as Telegram, InputFile } from 'https://deno.land/x/grammy/mod.ts'
+import {copy } from "https://deno.land/std/io/util.ts";
+import {InputMediaPhoto, InputMediaVideo} from 'https://deno.land/x/grammy/platform.ts'
+import {readerFromStreamReader } from "https://deno.land/std/io/mod.ts";
 
-import {Api as Telegram, InputFile} from 'grammy';
-import {InputMediaPhoto, InputMediaVideo} from 'grammy/out/platform';
-import got from 'got';
+import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded.ts'
+import {download} from '../download.ts'
+import {ErrorHandler, sequentialAsync} from '../generics.ts'
+import {FILE_PATH, PUBLIC_TARGET_CHAT, META_TARGET_CHAT} from '../constants.ts'
+import {humanReadableFilesize} from '../formatting.ts'
 
-import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded.js';
-import {download} from '../download.js';
-import {ErrorHandler, sequentialAsync} from '../generics.js';
-import {FILE_PATH, PUBLIC_TARGET_CHAT, META_TARGET_CHAT} from '../constants.js';
-import {humanReadableFilesize} from '../formatting.js';
-
-import {Entry, getAll} from './currently-available.js';
-import {mediaInformationFromMediaObjectJson} from './parse-media-obj.js';
+import {Entry, getAll} from './currently-available.ts'
+import {mediaInformationFromMediaObjectJson} from './parse-media-obj.ts'
 
 export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 	const entries = await getAll(errorHandler);
@@ -30,33 +29,36 @@ export async function doit(telegram: Telegram, errorHandler: ErrorHandler) {
 }
 
 async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaObject}: Entry): Promise<void> {
-	const mediaInformation = mediaInformationFromMediaObjectJson(mediaObject);
-	const filenamePrefix = ['WDRMaus', context, mediaInformation.airtimeISO, mediaInformation.uniqueId, ''].join('-');
+	const mediaInformation = mediaInformationFromMediaObjectJson(mediaObject)
+	const filenamePrefix = ['WDRMaus', context, mediaInformation.airtimeISO, mediaInformation.uniqueId, ''].join('-')
 
-	let finalCaption = '';
-	finalCaption += mediaInformation.title;
-	finalCaption += '\n';
-	finalCaption += mediaInformation.airtime;
-	finalCaption += ' ';
-	finalCaption += '#' + context;
+	let finalCaption = ''
+	finalCaption += mediaInformation.title
+	finalCaption += '\n'
+	finalCaption += mediaInformation.airtime
+	finalCaption += ' '
+	finalCaption += '#' + context
 
-	console.log();
-	console.log();
-	console.log('download now', context, 'Title:', mediaInformation.title, 'AirTime:', mediaInformation.airtime);
-	console.log('image', imageUrl);
-	console.log('video', mediaInformation.videoNormal);
-	console.log('DGS', mediaInformation.videoDgs);
-	console.log('Caption', mediaInformation.captionsSrt);
+	console.log()
+	console.log()
+	console.log('download now', context, 'Title:', mediaInformation.title, 'AirTime:', mediaInformation.airtime)
+	console.log('image', imageUrl)
+	console.log('video', mediaInformation.videoNormal)
+	console.log('DGS', mediaInformation.videoDgs)
+	console.log('Caption', mediaInformation.captionsSrt)
 
-	const photoMessage = await telegram.sendPhoto(META_TARGET_CHAT, imageUrl, {disable_notification: true, caption: 'Start download...\n\n' + finalCaption});
+	const photoMessage = await telegram.sendPhoto(META_TARGET_CHAT, imageUrl, {disable_notification: true, caption: 'Start download...\n\n' + finalCaption})
 
-	console.log(`start download ${context} ${mediaInformation.airtimeISO} ${mediaInformation.title}…`);
-	console.time('download');
+	console.log(`start download ${context} ${mediaInformation.airtimeISO} ${mediaInformation.title}…`)
+	console.time('download')
 
-	console.time('download 1image');
-	got.stream(imageUrl)
-		.pipe(createWriteStream(FILE_PATH + filenamePrefix + '1image.jpg'));
-	console.timeEnd('download 1image');
+	console.time('download 1image')
+	const imageResponse = await fetch(imageUrl)
+	const r = readerFromStreamReader(imageResponse.body!.getReader())
+	const file = await Deno.open(FILE_PATH + filenamePrefix + '1image.jpg', {create: true, write: true})
+	await copy(r, file);
+	file.close();
+	console.timeEnd('download 1image')
 
 	console.time('download 2normal');
 	await download(mediaInformation.videoNormal, mediaInformation.captionsSrt, FILE_PATH, filenamePrefix + '2normal.mp4');
@@ -70,8 +72,8 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 
 	console.timeEnd('download');
 
-	if (process.env['TELEGRAM_API_ROOT']?.includes('http://')) {
-		console.time('upload to TG');
+	if (Deno.env.get('TELEGRAM_API_ROOT')?.includes('http://')) {
+		console.time('upload to TG')
 
 		const media: Array<InputMediaPhoto | InputMediaVideo> = [
 			{type: 'photo', media: imageUrl, caption: finalCaption},
@@ -86,8 +88,9 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 		console.timeEnd('upload to TG');
 	}
 
-	const relevantFiles = readdirSync(FILE_PATH)
-		.filter(o => o.startsWith(filenamePrefix));
+	const relevantFiles = Array.from(Deno.readDirSync(FILE_PATH))
+		.map(o => o.name)
+		.filter(o => o.startsWith(filenamePrefix))
 
 	let finishedReportMessage = 'finished download\n\n';
 	finishedReportMessage += filenamePrefix + '\n';

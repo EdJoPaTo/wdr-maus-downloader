@@ -1,9 +1,7 @@
-import {statSync} from 'fs';
-
 export function humanReadableFilesize(path: string): string {
-	const {size} = statSync(path);
-	let rest = size;
-	let unit = 0;
+	const {size} = Deno.statSync(path)
+	let rest = size
+	let unit = 0
 	while (rest > 1000) {
 		rest /= 1000;
 		unit += 1;

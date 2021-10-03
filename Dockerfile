@@ -1,19 +1,3 @@
-FROM docker.io/library/node:14-alpine AS builder
-WORKDIR /build
-
-COPY package.json package-lock.json tsconfig.json ./
-RUN npm ci
-
-COPY source source
-RUN node_modules/.bin/tsc
-
-
-FROM docker.io/library/node:14-alpine AS packages
-WORKDIR /build
-COPY package.json package-lock.json ./
-RUN npm ci --production
-
-
 # ffmpeg versions
 # alpine:3.13           4.3.1
 # alpine:3.14           4.4
@@ -23,20 +7,24 @@ RUN npm ci --production
 # node:14-alpine3.14    4.4
 # node:16-alpine        4.3.1
 # node:16-alpine3.14    4.4
+# deno:alpine           4.3.1
 
-FROM docker.io/library/alpine:3.14
+FROM docker.io/denoland/deno:alpine
 ENV NODE_ENV=production
 RUN apk --no-cache upgrade \
-    && apk --no-cache add ffmpeg nodejs \
-    && ffmpeg -version \
-    && node --version
+    && apk --no-cache add ffmpeg \
+    && ffmpeg -version
 
 WORKDIR /app
 VOLUME /app/files
 VOLUME /app/tmp
 
-COPY package.json ./
-COPY --from=packages /build/node_modules ./node_modules
-COPY --from=builder /build/dist ./
+COPY source source
+RUN deno cache source/index.ts
 
-CMD node --unhandled-rejections=strict -r source-map-support/register index.js
+CMD /bin/deno run \
+    --allow-env \
+    --allow-net \
+    --allow-read \
+    --allow-write \
+    source/index.ts

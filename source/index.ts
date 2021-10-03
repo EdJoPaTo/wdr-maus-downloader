@@ -1,27 +1,19 @@
-import {Agent} from 'http';
-import {writeFileSync} from 'fs';
+import {ApiClientOptions, Bot} from 'https://deno.land/x/grammy/mod.ts'
 
-import {ApiClientOptions, Bot} from 'grammy';
+import {doit as loadFromMediaObjects} from './media-objects/index.ts'
+import {META_TARGET_CHAT} from './constants.ts'
+import {sleep} from './generics.ts'
 
-import {doit as loadFromMediaObjects} from './media-objects/index.js';
-import {META_TARGET_CHAT} from './constants.js';
-import {sleep} from './generics.js';
-
-process.title = 'wdrmaus-downloader';
-
-const token = process.env['BOT_TOKEN'];
+const token = Deno.env.get('BOT_TOKEN')
 if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)');
 }
 
-const client: ApiClientOptions = {};
-const apiRoot = process.env['TELEGRAM_API_ROOT'];
+const client: ApiClientOptions = {}
+const apiRoot = Deno.env.get('TELEGRAM_API_ROOT')
 if (apiRoot) {
-	client.apiRoot = apiRoot;
-	client.baseFetchConfig = {
-		compress: true,
-		agent: new Agent({keepAlive: true}),
-	};
+	client.apiRoot = apiRoot
+	client.baseFetchConfig = {}
 }
 
 const bot = new Bot(token, {client});
@@ -45,15 +37,15 @@ async function handleError(context: string, error: unknown): Promise<void> {
 }
 
 async function run(): Promise<void> {
-	await loadFromMediaObjects(bot.api, handleError);
-	writeFileSync('.last-successful-run', new Date().toISOString(), 'utf8');
+	await loadFromMediaObjects(bot.api, handleError)
+	Deno.writeTextFileSync('.last-successful-run', new Date().toISOString())
 }
 
 async function startup(): Promise<void> {
 	const {username} = await bot.api.getMe();
 	console.log('bot connection works: bot is', username);
 
-	if (process.env['NODE_ENV'] === 'production') {
+	if (Deno.env.get('NODE_ENV') === 'production') {
 		// Dont run immediately as volume might need time to setup
 		await sleep(1000 * 60 * 10); // 10 minutes
 

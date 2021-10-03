@@ -1,9 +1,10 @@
-import got from 'got';
-import arrayFilterUnique from 'array-filter-unique';
+// deno-lint-ignore-file no-explicit-any
 
-import {matchAll, sequentialAsync, ErrorHandler} from '../generics.js';
+import arrayFilterUnique from 'https://esm.sh/array-filter-unique'
 
-import {parseMediaObjectJson} from './parse-media-obj.js';
+import {matchAll, sequentialAsync, ErrorHandler} from '../generics.ts'
+
+import {parseMediaObjectJson} from './parse-media-obj.ts'
 
 export type Context = 'AktuelleSendung' | 'MausBlick' | 'Corona';
 export interface Entry {
@@ -24,10 +25,10 @@ async function getMediaObjectsFromSource(source: string): Promise<any[]> {
 	const allMediaUrls = matchAll(/(https:[^'"]+\d+\.js)/g, source)
 		.map(o => o[1]!);
 
-	const allResponses = await sequentialAsync(async url => got(url), allMediaUrls);
+	const allResponses = await sequentialAsync(async url => await (await fetch(url)).text(), allMediaUrls)
 
 	return allResponses
-		.map(o => parseMediaObjectJson(o.body));
+		.map(o => parseMediaObjectJson(o))
 }
 
 function createEntries(context: Context, imageUrls: readonly string[], mediaObjects: readonly any[]): Entry[] {
@@ -45,8 +46,8 @@ function createEntries(context: Context, imageUrls: readonly string[], mediaObje
 async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> {
 	const context: Context = 'AktuelleSendung';
 	try {
-		const BASE_URL = 'https://www.wdrmaus.de/aktuelle-sendung/';
-		const {body} = await got(BASE_URL);
+		const BASE_URL = 'https://www.wdrmaus.de/aktuelle-sendung/'
+		const body = await (await fetch(BASE_URL)).text()
 
 		const imageUrls = matchAll(/aktuelle-sendung\/([^"]+.jpg)/g, body)
 			.map(o => o[1]!)
@@ -64,8 +65,8 @@ async function getAktuelleSendung(errorHandler: ErrorHandler): Promise<Entry[]> 
 async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
 	const context: Context = 'MausBlick';
 	try {
-		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/mausblick/';
-		const {body} = await got(BASE_URL);
+		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/mausblick/'
+		const body = await (await fetch(BASE_URL)).text()
 
 		const imageUrls = matchAll(/<img src="(imggen\/.+\.jpg)/g, body)
 			.map(o => o[1]!)
@@ -82,8 +83,8 @@ async function getMausBlick(errorHandler: ErrorHandler): Promise<Entry[]> {
 async function getCorona(errorHandler: ErrorHandler): Promise<Entry[]> {
 	const context: Context = 'Corona';
 	try {
-		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/corona/';
-		const {body} = await got(BASE_URL);
+		const BASE_URL = 'https://www.wdrmaus.de/extras/mausthemen/corona/'
+		const body = await (await fetch(BASE_URL)).text()
 
 		const imageUrls = matchAll(/<img src="..\/..\/..\/extras\/mausthemen\/corona\/(imggen\/.+\.jpg)/g, body)
 			.map(o => o[1]!)
