@@ -21,7 +21,7 @@ function downloadCommandLine(video: string, captions: string | undefined, target
 	return command
 }
 
-export async function download(video: string, captions: string | undefined, targetfolder: string, filename: string): Promise<{stdout: string; stderr: string}> {
+export async function download(video: string, captions: string | undefined, targetfolder: string, filename: string) {
 	const temporaryFile = 'tmp/' + filename
 	const command = downloadCommandLine(video, captions, temporaryFile)
 	const result = await exec(command)
