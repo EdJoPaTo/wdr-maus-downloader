@@ -20,7 +20,7 @@ if (apiRoot) {
 	client.apiRoot = apiRoot
 	client.baseFetchConfig = {
 		compress: true,
-		agent: new Agent({ keepAlive: true }),
+		agent: new Agent({keepAlive: true}),
 	}
 }
 
