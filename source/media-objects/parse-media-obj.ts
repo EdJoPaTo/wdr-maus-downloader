@@ -11,19 +11,19 @@ export interface MediaInformation {
 export function parseMediaObjectJson(source: string): any {
 	const jsonPartString = source
 		.replace('$mediaObject.jsonpHelper.storeAndPlay(', '')
-		.slice(0, -2)
-	return JSON.parse(jsonPartString)
+		.slice(0, -2);
+	return JSON.parse(jsonPartString);
 }
 
 export function mediaInformationFromMediaObjectJson(mediaObjectJson: any): MediaInformation {
-	const uniqueId: string = mediaObjectJson.trackerData.trackerClipId
-	const title: string = mediaObjectJson.trackerData.trackerClipTitle
-	const airtime: string = mediaObjectJson.trackerData.trackerClipAirTime
-	const airtimeISO = parseAirtimeToISO(airtime)
+	const uniqueId: string = mediaObjectJson.trackerData.trackerClipId;
+	const title: string = mediaObjectJson.trackerData.trackerClipTitle;
+	const airtime: string = mediaObjectJson.trackerData.trackerClipAirTime;
+	const airtimeISO = parseAirtimeToISO(airtime);
 
-	const videoNormal: string = httpsPrefix(mediaObjectJson.mediaResource.dflt.videoURL)!
-	const videoDgs: string | undefined = httpsPrefix(mediaObjectJson.mediaResource.dflt.slVideoURL)
-	const captionsSrt: string | undefined = httpsPrefix(mediaObjectJson.mediaResource.captionsHash.srt)
+	const videoNormal: string = httpsPrefix(mediaObjectJson.mediaResource.dflt.videoURL)!;
+	const videoDgs: string | undefined = httpsPrefix(mediaObjectJson.mediaResource.dflt.slVideoURL);
+	const captionsSrt: string | undefined = httpsPrefix(mediaObjectJson.mediaResource.captionsHash.srt);
 
 	return {
 		uniqueId,
@@ -33,18 +33,18 @@ export function mediaInformationFromMediaObjectJson(mediaObjectJson: any): Media
 		videoNormal,
 		videoDgs,
 		captionsSrt,
-	}
+	};
 }
 
 function httpsPrefix(url: string | undefined): string | undefined {
 	if (!url) {
-		return undefined
+		return undefined;
 	}
 
-	return 'https:' + url
+	return 'https:' + url;
 }
 
 function parseAirtimeToISO(airtime: string): string {
-	const [day, month, year, hour, minute] = airtime.split(/[. :]/g)
-	return `${year!}-${month!}-${day!}T${hour!}-${minute!}`
+	const [day, month, year, hour, minute] = airtime.split(/[. :]/g);
+	return `${year!}-${month!}-${day!}T${hour!}-${minute!}`;
 }

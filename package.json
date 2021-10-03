@@ -27,7 +27,6 @@
 		"xo": "^0.45.0"
 	},
 	"xo": {
-		"semicolon": false,
 		"rules": {
 			"@typescript-eslint/naming-convention": "off",
 			"@typescript-eslint/no-unsafe-assignment": "off",
