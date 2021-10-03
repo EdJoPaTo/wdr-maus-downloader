@@ -1,6 +1,6 @@
 import {writeFileSync} from 'fs'
 
-import {Bot} from 'grammy'
+import {ApiClientOptions, Bot} from 'grammy'
 
 import {doit as loadFromMediaObjects} from './media-objects/index.js'
 import {META_TARGET_CHAT} from './constants.js'
@@ -13,11 +13,13 @@ if (!token) {
 	throw new Error('You have to provide the bot-token from @BotFather via file (bot-token.txt) or environment variable (BOT_TOKEN)')
 }
 
-const bot = new Bot(token, {
-	client: {
-		apiRoot: process.env['TELEGRAM_API_ROOT'],
-	},
-})
+const client: ApiClientOptions = {}
+const apiRoot = process.env['TELEGRAM_API_ROOT']
+if (apiRoot) {
+	client.apiRoot = apiRoot
+}
+
+const bot = new Bot(token, {client})
 
 async function handleError(context: string, error: unknown): Promise<void> {
 	console.error('ERROR', context, error)
