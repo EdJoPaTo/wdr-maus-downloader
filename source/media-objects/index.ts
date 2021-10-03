@@ -43,6 +43,7 @@ async function doMediaObjectStuff(telegram: Telegram, {context, imageUrl, mediaO
 	console.log()
 	console.log()
 	console.log('download now', context, 'Title:', mediaInformation.title, 'AirTime:', mediaInformation.airtime)
+	console.log('image', imageUrl)
 	console.log('video', mediaInformation.videoNormal)
 	console.log('DGS', mediaInformation.videoDgs)
 	console.log('Caption', mediaInformation.captionsSrt)
