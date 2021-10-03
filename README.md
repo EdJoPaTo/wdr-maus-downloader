@@ -3,12 +3,11 @@
 This tools checks for a new episode of the ["Maus"](https://wdrmaus.de) and downloads it.
 It sends a notification to an update telegram channel when finished.
 
-The episode can then manually uploaded to the public channel [@wdrMaus](https://t.me/wdrMaus).
-This has to be manual for now as one episode is way bigger than the [file size limit for bots (currently 50 MB)](https://core.telegram.org/bots/api#sendvideo).
-Normal Users can send files up to 1.5 GB.
+Without a selfhosted tdbotapi the file limit for bots is 50 MB which is not enough for the episodes.
+The environment variable `TELEGRAM_API_ROOT` is used for a selfhosted tdbotapi like [tdlight-telegram-bot-api](https://github.com/tdlight-team/tdlight-telegram-bot-api)
+When the variable is configured the episodes are automatically uploaded to the public channel [@wdrMaus](https://t.me/wdrMaus).
 
-The files are added to the exposed VOLUME `/app/files`.
-
+The files are added to the exposed VOLUME `/app/files` and are not automatically cleaned up.
 
 ## Disclaimer
 
@@ -21,7 +20,3 @@ This is not meant for everyone to run.
 Mainly this is my own state of the sources.
 
 So this is not documented well.
-
-### Docker Secrets that have to be set
-
-`bot-token.txt`: The bot token of the Telegram Bot that is used.
