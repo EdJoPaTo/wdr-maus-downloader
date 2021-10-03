@@ -43,6 +43,9 @@ async function run(): Promise<void> {
 }
 
 async function startup(): Promise<void> {
+	const {username} = await bot.api.getMe()
+	console.log('bot connection works: bot is', username)
+
 	if (process.env['NODE_ENV'] === 'production') {
 		// Dont run immediately as volume might need time to setup
 		await sleep(1000 * 60 * 10) // 10 minutes
