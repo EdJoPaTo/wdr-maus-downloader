@@ -1,7 +1,7 @@
 import {createWriteStream, readdirSync} from 'fs';
 
 import {Api as Telegram, InputFile} from 'grammy';
-import {InputMediaPhoto, InputMediaVideo} from 'grammy/out/platform';
+import {InputMediaPhoto, InputMediaVideo} from 'grammy/out/platform.node';
 import got from 'got';
 
 import {addDownloaded, hasAlreadyDownloaded} from '../check-already-downloaded.js';
