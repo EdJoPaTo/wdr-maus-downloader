@@ -1,4 +1,4 @@
-FROM docker.io/library/node:14-alpine AS builder
+FROM docker.io/library/node:16-alpine AS builder
 WORKDIR /build
 
 COPY package.json package-lock.json tsconfig.json ./
@@ -8,7 +8,7 @@ COPY source source
 RUN node_modules/.bin/tsc
 
 
-FROM docker.io/library/node:14-alpine AS packages
+FROM docker.io/library/node:16-alpine AS packages
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci --production
@@ -24,7 +24,7 @@ RUN npm ci --production
 # node:16-alpine        4.3.1
 # node:16-alpine3.14    4.4
 
-FROM docker.io/library/alpine:3.14
+FROM docker.io/library/alpine:3.15
 ENV NODE_ENV=production
 RUN apk --no-cache upgrade \
     && apk --no-cache add ffmpeg nodejs \
@@ -39,4 +39,4 @@ COPY package.json ./
 COPY --from=packages /build/node_modules ./node_modules
 COPY --from=builder /build/dist ./
 
-CMD node --unhandled-rejections=strict -r source-map-support/register index.js
+CMD node -r source-map-support/register index.js
