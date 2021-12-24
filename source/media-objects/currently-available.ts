@@ -21,7 +21,7 @@ export async function getAll(errorHandler: ErrorHandler): Promise<Entry[]> {
 }
 
 async function getMediaObjectsFromSource(source: string): Promise<any[]> {
-	const allMediaUrls = matchAll(/(https:[^'"]+\d+\.js)/g, source)
+	const allMediaUrls = matchAll(/(https:[^'"]+\d+\.(?:js|assetjsonp))/g, source)
 		.map(o => o[1]!);
 
 	const allResponses = await sequentialAsync(async url => got(url), allMediaUrls);
