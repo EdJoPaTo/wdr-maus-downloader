@@ -1,4 +1,4 @@
-import {readFileSync, writeFileSync, mkdirSync} from 'fs';
+import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 
 import jsonStableStringify from 'json-stable-stringify';
 

@@ -1,4 +1,4 @@
-import {statSync} from 'fs';
+import {statSync} from 'node:fs';
 
 export function humanReadableFilesize(path: string): string {
 	const {size} = statSync(path);

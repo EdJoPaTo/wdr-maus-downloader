@@ -1,4 +1,4 @@
-import {createWriteStream, readdirSync} from 'fs';
+import {createWriteStream, readdirSync} from 'node:fs';
 
 import {Api as Telegram, InputFile} from 'grammy';
 import {InputMediaPhoto, InputMediaVideo} from 'grammy/out/platform.node';

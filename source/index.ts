@@ -1,5 +1,5 @@
-import {Agent} from 'http';
-import {writeFileSync} from 'fs';
+import {Agent} from 'node:http';
+import {writeFileSync} from 'node:fs';
 
 import {ApiClientOptions, Bot} from 'grammy';
 
