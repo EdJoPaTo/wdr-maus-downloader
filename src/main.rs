@@ -13,7 +13,7 @@ mod wdr_media;
 const DOWNLOADED_PATH: &str = "downloaded.yaml";
 
 #[cfg(not(debug_assertions))]
-const EVERY_MINUTES: u8 = 10;
+const EVERY_MINUTES: u8 = 20;
 
 fn main() {
     let tg = Telegram::new();
