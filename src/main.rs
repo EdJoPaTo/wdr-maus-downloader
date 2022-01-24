@@ -1,3 +1,6 @@
+#![forbid(unsafe_code)]
+#![allow(dead_code)]
+
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -12,7 +15,6 @@ mod wdr_media;
 
 const DOWNLOADED_PATH: &str = "downloaded.yaml";
 
-#[cfg(not(debug_assertions))]
 const EVERY_MINUTES: u8 = 20;
 
 fn main() {
@@ -24,7 +26,6 @@ fn main() {
 
         loop {
             do_evening(&tg).unwrap();
-            println!("sleep…\n\n");
             sleep(Duration::from_secs(30));
         }
     }
@@ -32,18 +33,23 @@ fn main() {
     #[cfg(not(debug_assertions))]
     loop {
         const SLEEPTIME: Duration = Duration::from_secs(60 * (EVERY_MINUTES as u64));
-        println!("sleep…\n\n");
         sleep(SLEEPTIME);
-
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {}", err);
+            tg.send_err(&format!("ERROR {}", err))
+                .expect("send error to Telegram failed");
         }
     }
 }
 
-#[cfg(not(debug_assertions))]
 fn iteration(tg: &Telegram) -> anyhow::Result<()> {
     let now = time::OffsetDateTime::now_utc();
+    println!(
+        "check UTC time… {:>2}:{:>02} {}",
+        now.hour(),
+        now.minute(),
+        now.weekday()
+    );
     if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 11 {
         do_sunday(tg)?;
     } else if now.hour() == 17 && now.minute() < EVERY_MINUTES {
@@ -53,28 +59,24 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
 }
 
 fn do_sunday(tg: &Telegram) -> anyhow::Result<()> {
-    println!("do sunday…");
+    println!("\n\ndo sunday…");
     let all = scrape::get_aktuell()?;
     let downloaded = get_downloaded();
     for not_yet_downloaded in all.iter().filter(|o| !downloaded.contains(&o.media)) {
-        match handle_one(tg, not_yet_downloaded) {
-            Ok(_) => mark_downloaded(not_yet_downloaded.media.clone()),
-            Err(err) => tg.send_err(&format!("{}", err))?,
-        }
+        handle_one(tg, not_yet_downloaded)?;
+        mark_downloaded(not_yet_downloaded.media.clone());
     }
     Ok(())
 }
 
 fn do_evening(tg: &Telegram) -> anyhow::Result<()> {
-    println!("do evening…");
+    println!("\n\ndo evening…");
     let all = scrape::get_all()?;
-    dbg!(all.len());
+    println!("found {} videos", all.len());
     let downloaded = get_downloaded();
     if let Some(not_yet_downloaded) = all.iter().find(|o| !downloaded.contains(&o.media)) {
-        match handle_one(tg, not_yet_downloaded) {
-            Ok(_) => mark_downloaded(not_yet_downloaded.media.clone()),
-            Err(err) => tg.send_err(&format!("{}", err))?,
-        }
+        handle_one(tg, not_yet_downloaded)?;
+        mark_downloaded(not_yet_downloaded.media.clone());
     }
     Ok(())
 }
@@ -88,9 +90,12 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let video = &media.media_resource.dflt.video;
     let sl = media.media_resource.dflt.sl_video.as_ref();
     let caption_srt = media.media_resource.captions_hash.srt.as_ref();
-    println!("found {} to download {}", topic, img.as_str());
-    println!("{} {}", air_time, title);
-    dbg!(
+    println!(
+        "found {} to download {} {}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
+        topic,
+        air_time,
+        title,
+        img.as_str(),
         video.as_str(),
         sl.map(url::Url::as_str),
         caption_srt.map(url::Url::as_str)

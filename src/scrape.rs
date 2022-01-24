@@ -40,7 +40,6 @@ pub fn get_all() -> anyhow::Result<Vec<Scraperesult>> {
     let mut all = Vec::new();
     all.append(&mut get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)?);
     all.append(&mut get_sachgeschichten()?);
-
     Ok(all)
 }
 
@@ -57,6 +56,11 @@ fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
         for container in containers {
             let (img, media) = get_video(base, container)?;
             videos.push(Scraperesult { topic, img, media });
+        }
+        if videos.is_empty() {
+            anyhow::bail!("no videos on {}", base.as_str());
+        } else if videos.len() > 1 {
+            println!("page has {} videos {}", videos.len(), base.as_str());
         }
         Ok(videos)
     }
@@ -76,7 +80,6 @@ fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
         .filter_map(|o| o.value().attr("href"))
         .filter_map(|o| BASE_URL.join(o).ok())
         .collect::<Vec<_>>();
-    dbg!(links.len());
     let mut videos = Vec::new();
     for link in &links {
         match get_themen_videos(Topic::Sachgeschichte, link) {
@@ -88,6 +91,9 @@ fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
             }
             Err(err) => println!("{} {}", err, link),
         };
+    }
+    if videos.is_empty() {
+        anyhow::bail!("Sachgeschichten: no videos");
     }
     Ok(videos)
 }

@@ -33,8 +33,16 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
     command.arg(file.path().as_os_str());
 
     if !command.status()?.success() {
-        dbg!(command.get_args().collect::<Vec<_>>());
-        anyhow::bail!("ffmpeg exited unsuccessfully");
+        let command_line = command
+            .get_args()
+            .skip(2)
+            .map(std::ffi::OsStr::to_string_lossy)
+            .collect::<Vec<_>>()
+            .join(" ");
+        anyhow::bail!(
+            "ffmpeg exited unsuccessfully. Commandline: {}",
+            command_line
+        );
     }
 
     Ok(file)
