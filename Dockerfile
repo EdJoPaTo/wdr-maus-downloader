@@ -1,17 +1,22 @@
-FROM docker.io/library/node:16-alpine AS builder
+FROM docker.io/library/rust:1-bullseye as builder
 WORKDIR /build
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY package.json package-lock.json tsconfig.json ./
-RUN npm ci
+# cargo needs a dummy src/main.rs to detect bin mode
+RUN mkdir -p src && echo "fn main() {}" > src/main.rs
 
-COPY source source
-RUN node_modules/.bin/tsc
+COPY Cargo.toml Cargo.lock ./
+RUN cargo fetch --locked
+RUN cargo build --release --frozen --offline
 
+# We need to touch our real main.rs file or the cached one will be used.
+COPY . ./
+RUN touch src/main.rs
 
-FROM docker.io/library/node:16-alpine AS packages
-WORKDIR /build
-COPY package.json package-lock.json ./
-RUN npm ci --production
+RUN cargo build --release --frozen --offline
 
 
 # ffmpeg versions
@@ -19,20 +24,21 @@ RUN npm ci --production
 # alpine:edge           4.4.1
 # node:16-alpine        4.4.1
 # node:16-alpine3.15    4.4.1
+# debian:bullseye-slim  4.3.3
+# debian:bookworm-slim  4.4.1
 
-FROM docker.io/library/node:16-alpine
-ENV NODE_ENV=production
-RUN apk --no-cache upgrade \
-    && apk --no-cache add ffmpeg \
+# Start building the final image
+FROM docker.io/library/debian:bookworm-slim
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y ffmpeg \
+    && apt-get clean \
     && ffmpeg -version \
-    && node --version
+    && rm -rf /var/lib/apt/lists/* /var/cache/* /var/log/*
 
 WORKDIR /app
-VOLUME /app/files
-VOLUME /app/tmp
+VOLUME /app
 
-COPY package.json ./
-COPY --from=packages /build/node_modules ./node_modules
-COPY --from=builder /build/dist ./
+COPY --from=builder /build/target/release/wdr-maus-downloader /usr/bin/
 
-CMD node --enable-source-maps index.js
+ENTRYPOINT ["wdr-maus-downloader"]

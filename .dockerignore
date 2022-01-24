@@ -1,13 +1,7 @@
 .*
 *.md
-**/*.test.*
-botfather-settings
-coverage
-dist
+/systemd
+/target
 Dockerfile
-node_modules
-test
 
-# botfiles
-files
-tmp
+downloaded.yaml

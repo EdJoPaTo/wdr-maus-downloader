@@ -7,8 +7,6 @@ Without a selfhosted tdbotapi the file limit for bots is 50 MB which is not enou
 The environment variable `TELEGRAM_API_ROOT` is used for a selfhosted tdbotapi like [tdlight-telegram-bot-api](https://github.com/tdlight-team/tdlight-telegram-bot-api)
 When the variable is configured the episodes are automatically uploaded to the public channel [@wdrMaus](https://t.me/wdrMaus).
 
-The files are added to the exposed VOLUME `/app/files` and are not automatically cleaned up.
-
 ## Disclaimer
 
 I have nothing to do with WDR, "Das Erste" or the "Die Maus" team.
