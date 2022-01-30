@@ -50,7 +50,7 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
 
 fn get_tempfile(suffix: &str) -> std::io::Result<NamedTempFile> {
     tempfile::Builder::new()
-        .prefix("wdr-maus-downloader-")
+        .prefix("wdr-maus-")
         .suffix(suffix)
         .tempfile()
 }
