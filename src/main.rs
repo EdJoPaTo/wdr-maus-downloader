@@ -139,10 +139,9 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
 }
 
 fn get_downloaded() -> Vec<WdrMedia> {
-    serde_yaml::from_str(
-        &std::fs::read_to_string(DOWNLOADED_PATH).unwrap_or_else(|_| "---\n[]".into()),
-    )
-    .expect("downloaded.yaml format error")
+    std::fs::read_to_string(DOWNLOADED_PATH)
+        .map(|content| serde_yaml::from_str(&content).expect("downloaded.yaml format error"))
+        .unwrap_or_default()
 }
 
 fn mark_downloaded(media: WdrMedia) {
