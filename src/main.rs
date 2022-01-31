@@ -112,7 +112,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         None
     };
     let download_took = start.elapsed();
-    println!("download took {:?}", download_took);
+    println!("download took {}", format_duration(download_took));
 
     let start = Instant::now();
     tg.send_public_result(
@@ -122,12 +122,12 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         sl.as_ref().map(|o| o.path().to_path_buf()),
     )?;
     let upload_took = start.elapsed();
-    println!("upload   took {:?}", upload_took);
+    println!("upload   took {}", format_duration(upload_took));
 
     let meta_caption = format!(
-        "download took {:?}\nupload took {:?}\n\nNormal: {}\nDGS: {}",
-        download_took,
-        upload_took,
+        "download took {}\nupload took {}\n\nNormal: {}\nDGS: {}",
+        format_duration(download_took),
+        format_duration(upload_took),
         path_filesize_string(normal.path()).expect("cant read video size"),
         sl.map_or_else(
             || "nope :(".into(),
@@ -155,6 +155,19 @@ fn mark_downloaded(media: WdrMedia) {
 
 fn path_filesize_string(path: &std::path::Path) -> anyhow::Result<String> {
     Ok(format_filesize(path.metadata()?.len()))
+}
+
+fn format_duration(duration: Duration) -> String {
+    let total_seconds = duration.as_secs_f64();
+    let seconds = total_seconds % 60.0;
+    let minutes = (total_seconds / 60.0).floor();
+    format!("{:.0} min {:.2} sec", minutes, seconds)
+}
+
+#[test]
+fn format_duration_works() {
+    assert_eq!("0 min 42.00 sec", format_duration(Duration::from_secs(42)));
+    assert_eq!("1 min 22.00 sec", format_duration(Duration::from_secs(82)));
 }
 
 #[allow(clippy::cast_precision_loss)]
