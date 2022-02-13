@@ -53,9 +53,9 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         now.minute(),
         now.weekday()
     );
-    if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 11 {
+    if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 12 {
         do_aktuelle(tg)?;
-    } else if now.hour() == 17 && now.minute() < EVERY_MINUTES {
+    } else if now.hour() == 15 && now.minute() < EVERY_MINUTES {
         do_evening(tg)?;
     }
     Ok(())
