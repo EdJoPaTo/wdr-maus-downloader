@@ -17,23 +17,26 @@ const DOWNLOADED_PATH: &str = "downloaded.yaml";
 
 const EVERY_MINUTES: u8 = 20;
 
+#[cfg(debug_assertions)]
+const SLEEPTIME: Duration = Duration::from_secs(30);
+#[cfg(not(debug_assertions))]
+const SLEEPTIME: Duration = Duration::from_secs(60 * (EVERY_MINUTES as u64));
+
 fn main() {
     let tg = Telegram::new();
 
-    #[cfg(debug_assertions)]
-    {
-        do_sunday(&tg).unwrap();
-
-        loop {
-            do_evening(&tg).unwrap();
-            sleep(Duration::from_secs(30));
-        }
-    }
-
     #[cfg(not(debug_assertions))]
+    sleep(SLEEPTIME);
+
+    do_aktuelle(&tg).expect("startup do_sunday failed");
+
     loop {
-        const SLEEPTIME: Duration = Duration::from_secs(60 * (EVERY_MINUTES as u64));
         sleep(SLEEPTIME);
+
+        #[cfg(debug_assertions)]
+        do_evening(&tg).unwrap();
+
+        #[cfg(not(debug_assertions))]
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {}", err);
             tg.send_err(&format!("ERROR {}", err))
@@ -51,14 +54,14 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         now.weekday()
     );
     if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 11 {
-        do_sunday(tg)?;
+        do_aktuelle(tg)?;
     } else if now.hour() == 17 && now.minute() < EVERY_MINUTES {
         do_evening(tg)?;
     }
     Ok(())
 }
 
-fn do_sunday(tg: &Telegram) -> anyhow::Result<()> {
+fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo sunday…");
     let all = scrape::get_aktuell()?;
     let downloaded = get_downloaded();
