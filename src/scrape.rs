@@ -36,13 +36,6 @@ lazy_static::lazy_static! {
     static ref VIDEOCONTAINER: Selector = Selector::parse(".videocontainer, .item.video").unwrap();
 }
 
-pub fn get_all() -> anyhow::Result<Vec<Scraperesult>> {
-    let mut all = Vec::new();
-    all.append(&mut get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)?);
-    all.append(&mut get_sachgeschichten()?);
-    Ok(all)
-}
-
 pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
     get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)
 }
@@ -67,7 +60,7 @@ fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
     inner(topic, base).map_err(|err| anyhow::anyhow!("{}: {}", topic, err))
 }
 
-fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
+pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
     const BASE_STR: &str = "https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle";
     lazy_static::lazy_static! {
         static ref BASE_URL: Url = Url::parse(BASE_STR).unwrap();

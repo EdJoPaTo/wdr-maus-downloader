@@ -28,13 +28,13 @@ fn main() {
     #[cfg(not(debug_assertions))]
     sleep(SLEEPTIME);
 
-    do_aktuelle(&tg).expect("startup do_sunday failed");
+    do_aktuelle(&tg).expect("startup do_aktuelle failed");
 
     loop {
         sleep(SLEEPTIME);
 
         #[cfg(debug_assertions)]
-        do_evening(&tg).unwrap();
+        do_sachgeschichte(&tg).unwrap();
 
         #[cfg(not(debug_assertions))]
         if let Err(err) = iteration(&tg) {
@@ -55,14 +55,18 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
     );
     if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 12 {
         do_aktuelle(tg)?;
-    } else if now.hour() == 15 && now.minute() < EVERY_MINUTES {
-        do_evening(tg)?;
+    } else if now.minute() < EVERY_MINUTES {
+        match now.hour() {
+            15 => do_sachgeschichte(tg)?,
+            17 => do_aktuelle(tg)?,
+            _ => {}
+        }
     }
     Ok(())
 }
 
 fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
-    println!("\n\ndo sunday…");
+    println!("\n\ndo aktuelle…");
     let all = scrape::get_aktuell()?;
     let downloaded = get_downloaded();
     for not_yet_downloaded in all.iter().filter(|o| !downloaded.contains(&o.media)) {
@@ -72,9 +76,9 @@ fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn do_evening(tg: &Telegram) -> anyhow::Result<()> {
-    println!("\n\ndo evening…");
-    let all = scrape::get_all()?;
+fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
+    println!("\n\ndo sachgeschichten…");
+    let all = scrape::get_sachgeschichten()?;
     println!("found {} videos", all.len());
     let downloaded = get_downloaded();
     if let Some(not_yet_downloaded) = all.iter().find(|o| !downloaded.contains(&o.media)) {
