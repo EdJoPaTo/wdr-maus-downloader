@@ -37,6 +37,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /var/cache/* /var/log/*
 
 WORKDIR /app
+ENV TZ=Europe/Berlin
 VOLUME /app
 
 COPY --from=builder /build/target/release/wdr-maus-downloader /usr/bin/

@@ -14,7 +14,7 @@ mod scrape;
 mod telegram;
 mod wdr_media;
 
-const EVERY_MINUTES: u8 = 20;
+const EVERY_MINUTES: u32 = 20;
 
 #[cfg(debug_assertions)]
 const SLEEPTIME: Duration = Duration::from_secs(30);
@@ -45,19 +45,21 @@ fn main() {
 }
 
 fn iteration(tg: &Telegram) -> anyhow::Result<()> {
-    let now = time::OffsetDateTime::now_utc();
+    use chrono::{Datelike, Local, Timelike, Weekday};
+
+    let now = Local::now();
     println!(
-        "check UTC time… {:>2}:{:>02} {}",
+        "check time… {:>2}:{:>02} {}",
         now.hour(),
         now.minute(),
         now.weekday()
     );
-    if now.weekday() == time::Weekday::Sunday && now.hour() >= 7 && now.hour() <= 12 {
+    if now.weekday() == Weekday::Sun && now.hour() >= 8 && now.hour() <= 13 {
         do_aktuelle(tg)?;
     } else if now.minute() < EVERY_MINUTES {
         match now.hour() {
-            15 => do_sachgeschichte(tg)?,
-            17 => do_aktuelle(tg)?,
+            16 => do_sachgeschichte(tg)?,
+            19 => do_aktuelle(tg)?,
             _ => {}
         }
     }
