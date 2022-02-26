@@ -4,16 +4,15 @@
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
+use crate::downloaded::Downloaded;
 use crate::scrape::Scraperesult;
 use crate::telegram::Telegram;
-use crate::wdr_media::WdrMedia;
 
+mod downloaded;
 mod ffmpeg;
 mod scrape;
 mod telegram;
 mod wdr_media;
-
-const DOWNLOADED_PATH: &str = "downloaded.yaml";
 
 const EVERY_MINUTES: u8 = 20;
 
@@ -68,10 +67,11 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
 fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo aktuelle…");
     let all = scrape::get_aktuell()?;
-    let downloaded = get_downloaded();
-    for not_yet_downloaded in all.iter().filter(|o| !downloaded.contains(&o.media)) {
+    let downloaded = Downloaded::new();
+    let all = all.iter().filter(|o| !downloaded.was_downloaded(&o.media));
+    for not_yet_downloaded in all {
         handle_one(tg, not_yet_downloaded)?;
-        mark_downloaded(not_yet_downloaded.media.clone());
+        Downloaded::mark_downloaded(not_yet_downloaded.media.clone());
     }
     Ok(())
 }
@@ -80,10 +80,10 @@ fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo sachgeschichten…");
     let all = scrape::get_sachgeschichten()?;
     println!("found {} videos", all.len());
-    let downloaded = get_downloaded();
-    if let Some(not_yet_downloaded) = all.iter().find(|o| !downloaded.contains(&o.media)) {
+    let downloaded = Downloaded::new();
+    if let Some(not_yet_downloaded) = all.iter().find(|o| !downloaded.was_downloaded(&o.media)) {
         handle_one(tg, not_yet_downloaded)?;
-        mark_downloaded(not_yet_downloaded.media.clone());
+        Downloaded::mark_downloaded(not_yet_downloaded.media.clone());
     }
     Ok(())
 }
@@ -143,20 +143,6 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     );
     tg.send_done(meta_msg, &meta_caption)?;
     Ok(())
-}
-
-fn get_downloaded() -> Vec<WdrMedia> {
-    std::fs::read_to_string(DOWNLOADED_PATH)
-        .map(|content| serde_yaml::from_str(&content).expect("downloaded.yaml format error"))
-        .unwrap_or_default()
-}
-
-fn mark_downloaded(media: WdrMedia) {
-    let mut downloaded = get_downloaded();
-    downloaded.push(media);
-    downloaded.sort();
-    let content = serde_yaml::to_string(&downloaded).unwrap();
-    std::fs::write(DOWNLOADED_PATH, content).expect("failed to write downloaded.yaml");
 }
 
 fn path_filesize_string(path: &std::path::Path) -> anyhow::Result<String> {

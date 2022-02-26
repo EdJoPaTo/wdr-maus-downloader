@@ -65,7 +65,9 @@ pub struct MediaResources {
     )]
     pub preview_image: Option<Url>,
 
+    /// does that mean `default`?
     pub dflt: MediaResource,
+    /// alternative
     pub alt: MediaResource,
     #[serde(default)]
     pub captions_hash: Captions,
@@ -101,6 +103,19 @@ where
 {
     let url = deserialize_url(deserializer)?;
     Ok(Some(url))
+}
+
+impl MediaResources {
+    pub const fn score(&self) -> usize {
+        let mut score = 0;
+        if self.captions_hash.srt.is_some() {
+            score += 1;
+        }
+        if self.dflt.sl_video.is_some() {
+            score += 1;
+        }
+        score
+    }
 }
 
 #[test]
