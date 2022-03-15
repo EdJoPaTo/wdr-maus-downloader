@@ -58,7 +58,7 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         do_aktuelle(tg)?;
     } else if now.minute() > 59 - EVERY_MINUTES {
         match now.hour() {
-            16 => do_sachgeschichte(tg)?,
+            6 | 16 => do_sachgeschichte(tg)?,
             19 => do_aktuelle(tg)?,
             _ => {}
         }
