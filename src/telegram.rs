@@ -42,15 +42,13 @@ impl Telegram {
     }
 
     pub fn send_err(&self, text: &str) -> anyhow::Result<()> {
-        self.api
-            .send_message(
-                &SendMessageParamsBuilder::default()
-                    .chat_id(META_CHANNEL)
-                    .text(text)
-                    .build()
-                    .unwrap(),
-            )
-            .map_err(map_tg_error)?;
+        self.api.send_message(
+            &SendMessageParamsBuilder::default()
+                .chat_id(META_CHANNEL)
+                .text(text)
+                .build()
+                .unwrap(),
+        )?;
         Ok(())
     }
 
@@ -64,24 +62,21 @@ impl Telegram {
                     .photo(img.to_string())
                     .build()
                     .unwrap(),
-            )
-            .map_err(map_tg_error)?
+            )?
             .result
             .message_id;
         Ok(message_id)
     }
 
     pub fn send_done(&self, reply_to: i32, text: &str) -> anyhow::Result<()> {
-        self.api
-            .send_message(
-                &SendMessageParamsBuilder::default()
-                    .chat_id(META_CHANNEL)
-                    .text(text)
-                    .reply_to_message_id(reply_to)
-                    .build()
-                    .unwrap(),
-            )
-            .map_err(map_tg_error)?;
+        self.api.send_message(
+            &SendMessageParamsBuilder::default()
+                .chat_id(META_CHANNEL)
+                .text(text)
+                .reply_to_message_id(reply_to)
+                .build()
+                .unwrap(),
+        )?;
         Ok(())
     }
 
@@ -112,20 +107,13 @@ impl Telegram {
                 InputMediaVideoBuilder::default().media(sl).build().unwrap(),
             ));
         }
-        self.api
-            .send_media_group(
-                &SendMediaGroupParamsBuilder::default()
-                    .chat_id(PUBLIC_CHANNEL)
-                    .media(media)
-                    .build()
-                    .unwrap(),
-            )
-            .map_err(map_tg_error)?;
+        self.api.send_media_group(
+            &SendMediaGroupParamsBuilder::default()
+                .chat_id(PUBLIC_CHANNEL)
+                .media(media)
+                .build()
+                .unwrap(),
+        )?;
         Ok(())
     }
-}
-
-#[allow(clippy::needless_pass_by_value)]
-fn map_tg_error(err: frankenstein::Error) -> anyhow::Error {
-    anyhow::anyhow!("tgerr {:?}", err)
 }
