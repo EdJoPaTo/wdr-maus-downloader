@@ -18,6 +18,7 @@ chrono = "0.4"
 frankenstein = "0.10"
 lazy_static = "1"
 regex = "1"
+retry = { version = "1", default-features = false }
 scraper = "0.12"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

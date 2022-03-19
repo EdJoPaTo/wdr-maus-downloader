@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 #![allow(dead_code)]
 
+use retry::retry;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -143,7 +144,10 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
             |sl| path_filesize_string(sl.path()).expect("cant read video size")
         ),
     );
-    tg.send_done(meta_msg, &meta_caption)?;
+    retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
+        tg.send_done(meta_msg, &meta_caption)
+    })
+    .map_err(|err| anyhow::anyhow!("{}", err))?;
     Ok(())
 }
 
