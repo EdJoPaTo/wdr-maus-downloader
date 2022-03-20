@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use frankenstein::{
-    Api, InputMediaPhotoBuilder, InputMediaVideoBuilder, Media, SendMediaGroupParamsBuilder,
-    SendMessageParamsBuilder, SendPhotoParamsBuilder, TelegramApi,
+    Api, InputMediaPhoto, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
+    SendPhotoParams, TelegramApi,
 };
 use url::Url;
 
@@ -43,11 +43,10 @@ impl Telegram {
 
     pub fn send_err(&self, text: &str) -> anyhow::Result<()> {
         self.api.send_message(
-            &SendMessageParamsBuilder::default()
+            &SendMessageParams::builder()
                 .chat_id(META_CHANNEL)
                 .text(text)
-                .build()
-                .unwrap(),
+                .build(),
         )?;
         Ok(())
     }
@@ -56,12 +55,11 @@ impl Telegram {
         let message_id = self
             .api
             .send_photo(
-                &SendPhotoParamsBuilder::default()
+                &SendPhotoParams::builder()
                     .chat_id(META_CHANNEL)
                     .caption(text)
                     .photo(img.to_string())
-                    .build()
-                    .unwrap(),
+                    .build(),
             )?
             .result
             .message_id;
@@ -70,12 +68,11 @@ impl Telegram {
 
     pub fn send_done(&self, reply_to: i32, text: &str) -> anyhow::Result<()> {
         self.api.send_message(
-            &SendMessageParamsBuilder::default()
+            &SendMessageParams::builder()
                 .chat_id(META_CHANNEL)
                 .text(text)
                 .reply_to_message_id(reply_to)
-                .build()
-                .unwrap(),
+                .build(),
         )?;
         Ok(())
     }
@@ -89,30 +86,21 @@ impl Telegram {
     ) -> anyhow::Result<()> {
         let mut media = vec![
             Media::Photo(
-                InputMediaPhotoBuilder::default()
+                InputMediaPhoto::builder()
                     .caption(caption)
                     .media(img.to_string())
-                    .build()
-                    .unwrap(),
+                    .build(),
             ),
-            Media::Video(
-                InputMediaVideoBuilder::default()
-                    .media(normal)
-                    .build()
-                    .unwrap(),
-            ),
+            Media::Video(InputMediaVideo::builder().media(normal).build()),
         ];
         if let Some(sl) = sl {
-            media.push(Media::Video(
-                InputMediaVideoBuilder::default().media(sl).build().unwrap(),
-            ));
+            media.push(Media::Video(InputMediaVideo::builder().media(sl).build()));
         }
         self.api.send_media_group(
-            &SendMediaGroupParamsBuilder::default()
+            &SendMediaGroupParams::builder()
                 .chat_id(PUBLIC_CHANNEL)
                 .media(media)
-                .build()
-                .unwrap(),
+                .build(),
         )?;
         Ok(())
     }

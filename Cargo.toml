@@ -15,7 +15,7 @@ lto = true
 [dependencies]
 anyhow = "1"
 chrono = "0.4"
-frankenstein = "0.11"
+frankenstein = "0.12"
 lazy_static = "1"
 regex = "1"
 retry = { version = "1", default-features = false }
