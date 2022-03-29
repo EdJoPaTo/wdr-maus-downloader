@@ -112,6 +112,7 @@ impl Telegram {
         let video = match VideoStats::load(&path) {
             Ok(stats) => InputMediaVideo::builder()
                 .media(path)
+                .supports_streaming(true)
                 .duration(stats.duration)
                 .width(stats.width)
                 .height(stats.height)
@@ -119,7 +120,10 @@ impl Telegram {
             Err(err) => {
                 eprintln!("WARNING failed to get VideoStats: {}", err);
                 self.send_err(&format!("failed to get VideoStats: {}", err));
-                InputMediaVideo::builder().media(path).build()
+                InputMediaVideo::builder()
+                    .media(path)
+                    .supports_streaming(true)
+                    .build()
             }
         };
         Media::Video(video)
