@@ -39,8 +39,7 @@ fn main() {
         #[cfg(not(debug_assertions))]
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {}", err);
-            tg.send_err(&format!("ERROR {}", err))
-                .expect("send error to Telegram failed");
+            tg.send_err(&format!("ERROR {}", err));
         }
     }
 }

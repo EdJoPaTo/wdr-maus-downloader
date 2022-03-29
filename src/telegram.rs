@@ -6,6 +6,8 @@ use frankenstein::{
 };
 use url::Url;
 
+use crate::ffmpeg::VideoStats;
+
 #[cfg(not(debug_assertions))]
 const PUBLIC_CHANNEL: i64 = -1_001_155_474_248;
 #[cfg(not(debug_assertions))]
@@ -41,14 +43,15 @@ impl Telegram {
         Self { api }
     }
 
-    pub fn send_err(&self, text: &str) -> anyhow::Result<()> {
-        self.api.send_message(
-            &SendMessageParams::builder()
-                .chat_id(META_CHANNEL)
-                .text(text)
-                .build(),
-        )?;
-        Ok(())
+    pub fn send_err(&self, text: &str) {
+        self.api
+            .send_message(
+                &SendMessageParams::builder()
+                    .chat_id(META_CHANNEL)
+                    .text(text)
+                    .build(),
+            )
+            .expect("Send error to Telegram failed");
     }
 
     pub fn send_begin(&self, img: &Url, text: &str) -> anyhow::Result<i32> {
@@ -91,10 +94,10 @@ impl Telegram {
                     .media(img.to_string())
                     .build(),
             ),
-            Media::Video(InputMediaVideo::builder().media(normal).build()),
+            self.build_video(normal),
         ];
         if let Some(sl) = sl {
-            media.push(Media::Video(InputMediaVideo::builder().media(sl).build()));
+            media.push(self.build_video(sl));
         }
         self.api.send_media_group(
             &SendMediaGroupParams::builder()
@@ -103,5 +106,22 @@ impl Telegram {
                 .build(),
         )?;
         Ok(())
+    }
+
+    fn build_video(&self, path: PathBuf) -> Media {
+        let video = match VideoStats::load(&path) {
+            Ok(stats) => InputMediaVideo::builder()
+                .media(path)
+                .duration(stats.duration)
+                .width(stats.width)
+                .height(stats.height)
+                .build(),
+            Err(err) => {
+                eprintln!("WARNING failed to get VideoStats: {}", err);
+                self.send_err(&format!("failed to get VideoStats: {}", err));
+                InputMediaVideo::builder().media(path).build()
+            }
+        };
+        Media::Video(video)
     }
 }
