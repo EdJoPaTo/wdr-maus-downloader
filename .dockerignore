@@ -4,4 +4,4 @@
 /target
 Dockerfile
 
-downloaded.yaml
+*.yaml

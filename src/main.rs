@@ -9,18 +9,17 @@ use crate::downloaded::Downloaded;
 use crate::scrape::Scraperesult;
 use crate::telegram::Telegram;
 
+mod daily;
 mod downloaded;
 mod ffmpeg;
 mod scrape;
 mod telegram;
 mod wdr_media;
 
-const EVERY_MINUTES: u32 = 20;
-
 #[cfg(debug_assertions)]
 const SLEEPTIME: Duration = Duration::from_secs(30);
 #[cfg(not(debug_assertions))]
-const SLEEPTIME: Duration = Duration::from_secs(60 * (EVERY_MINUTES as u64));
+const SLEEPTIME: Duration = Duration::from_secs(60 * 20); // 20 min
 
 fn main() {
     let tg = Telegram::new();
@@ -45,23 +44,18 @@ fn main() {
 }
 
 fn iteration(tg: &Telegram) -> anyhow::Result<()> {
-    use chrono::{Datelike, Local, Timelike, Weekday};
-
-    let now = Local::now();
-    println!(
-        "check time… {:>2}:{:>02} {}",
-        now.hour(),
-        now.minute(),
-        now.weekday()
-    );
-    if now.weekday() == Weekday::Sun && now.hour() >= 8 && now.hour() < 13 {
-        do_aktuelle(tg)?;
-    } else if now.minute() > 59 - EVERY_MINUTES {
-        // in the minutes before that hour
-        match now.hour() + 1 {
-            6 | 17 => do_sachgeschichte(tg)?,
-            19 => do_aktuelle(tg)?,
-            _ => {}
+    use crate::daily::{Daily, Job};
+    let mut daily = Daily::new();
+    if let Some(job) = daily.get_next() {
+        match job {
+            Job::AktuelleSunday | Job::AktuelleCheckup => {
+                do_aktuelle(tg)?;
+                daily.mark_successful(job);
+            }
+            Job::SachgeschichteMorning | Job::SachgeschichteEvening => {
+                do_sachgeschichte(tg)?;
+                daily.mark_successful(job);
+            }
         }
     }
     Ok(())
