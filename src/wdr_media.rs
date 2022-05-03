@@ -116,6 +116,22 @@ impl MediaResources {
         }
         score
     }
+
+    pub const fn get_video(&self) -> &Url {
+        if matches!(self.alt.media_format, MediaFormat::Mp4) {
+            &self.alt.video
+        } else {
+            &self.dflt.video
+        }
+    }
+
+    pub const fn get_sl_video(&self) -> Option<&Url> {
+        if matches!(self.alt.media_format, MediaFormat::Mp4) {
+            self.alt.sl_video.as_ref()
+        } else {
+            self.dflt.sl_video.as_ref()
+        }
+    }
 }
 
 #[test]

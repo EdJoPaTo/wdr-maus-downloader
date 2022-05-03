@@ -91,8 +91,8 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let media = &video.media;
     let title = &media.tracker_data.title;
     let air_time = &media.tracker_data.air_time;
-    let video = &media.media_resource.dflt.video;
-    let sl = media.media_resource.dflt.sl_video.as_ref();
+    let video = media.media_resource.get_video();
+    let sl = media.media_resource.get_sl_video();
     let caption_srt = media.media_resource.captions_hash.srt.as_ref();
     println!(
         "found {} to download {} {}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
