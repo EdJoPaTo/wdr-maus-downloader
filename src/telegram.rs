@@ -63,20 +63,23 @@ impl Telegram {
                     .caption(text)
                     .photo(img.to_string())
                     .build(),
-            )?
+            )
+            .map_err(|err| anyhow::anyhow!("Telegram::send_photo {}", err))?
             .result
             .message_id;
         Ok(message_id)
     }
 
     pub fn send_done(&self, reply_to: i32, text: &str) -> anyhow::Result<()> {
-        self.api.send_message(
-            &SendMessageParams::builder()
-                .chat_id(META_CHANNEL)
-                .text(text)
-                .reply_to_message_id(reply_to)
-                .build(),
-        )?;
+        self.api
+            .send_message(
+                &SendMessageParams::builder()
+                    .chat_id(META_CHANNEL)
+                    .text(text)
+                    .reply_to_message_id(reply_to)
+                    .build(),
+            )
+            .map_err(|err| anyhow::anyhow!("Telegram::send_message {}", err))?;
         Ok(())
     }
 
@@ -99,12 +102,14 @@ impl Telegram {
         if let Some(sl) = sl {
             media.push(self.build_video(sl));
         }
-        self.api.send_media_group(
-            &SendMediaGroupParams::builder()
-                .chat_id(PUBLIC_CHANNEL)
-                .media(media)
-                .build(),
-        )?;
+        self.api
+            .send_media_group(
+                &SendMediaGroupParams::builder()
+                    .chat_id(PUBLIC_CHANNEL)
+                    .media(media)
+                    .build(),
+            )
+            .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {}", err))?;
         Ok(())
     }
 
