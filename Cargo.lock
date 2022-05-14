@@ -194,9 +194,9 @@ dependencies = [
 
 [[package]]
 name = "frankenstein"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "505a64c82037e006bb8a977c1f26bc08b853ebfdb80c869a0cfb660de30887f0"
+checksum = "b0f1ca80414303ee545d7f651df86aac6251ddf74641e96fe2a5e59475ccdfa8"
 dependencies = [
  "mime_guess",
  "multipart",
