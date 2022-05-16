@@ -46,7 +46,10 @@ pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
 pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
     let mut videos = Vec::new();
     videos.append(&mut get_linked_videos(Topic::Zukunft, &ZUKUNFT)?);
-    videos.append(&mut get_linked_videos(Topic::Sachgeschichte, &SACHGESCHICHTEN)?);
+    videos.append(&mut get_linked_videos(
+        Topic::Sachgeschichte,
+        &SACHGESCHICHTEN,
+    )?);
     Ok(videos)
 }
 
