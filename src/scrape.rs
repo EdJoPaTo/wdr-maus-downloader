@@ -32,12 +32,46 @@ fn get(url: &str) -> anyhow::Result<String> {
 
 lazy_static::lazy_static! {
     static ref AKTUELLE: Url = Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap();
+    static ref SACHGESCHICHTEN: Url = Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap();
 
     static ref VIDEOCONTAINER: Selector = Selector::parse(".videocontainer, .item.video").unwrap();
 }
 
 pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
     get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)
+}
+
+pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
+    get_linked_videos(Topic::Sachgeschichte, &SACHGESCHICHTEN)
+}
+
+fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
+    lazy_static::lazy_static! {
+        static ref LINK: Selector = Selector::parse(".links .dynamicteaser a").unwrap();
+    }
+    let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {}", err))?;
+    let body = scraper::Html::parse_document(&body);
+    let links = body
+        .select(&LINK)
+        .filter_map(|o| o.value().attr("href"))
+        .filter_map(|o| base.join(o).ok())
+        .collect::<Vec<_>>();
+    let mut videos = Vec::new();
+    for link in &links {
+        match get_themen_videos(topic, link) {
+            Ok(mut v) => {
+                videos.append(&mut v);
+                if videos.len() % 25 == 0 {
+                    println!("{:>4}/{:<4} {}", videos.len(), links.len(), topic);
+                }
+            }
+            Err(err) => println!("{} {}", err, link),
+        };
+    }
+    if videos.is_empty() {
+        anyhow::bail!("no linked videos");
+    }
+    Ok(videos)
 }
 
 fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
@@ -58,37 +92,6 @@ fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
         Ok(videos)
     }
     inner(topic, base).map_err(|err| anyhow::anyhow!("{}: {}", topic, err))
-}
-
-pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
-    const BASE_STR: &str = "https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle";
-    lazy_static::lazy_static! {
-        static ref BASE_URL: Url = Url::parse(BASE_STR).unwrap();
-        static ref LINK: Selector = Selector::parse(".links .dynamicteaser a").unwrap();
-    }
-    let body = get(BASE_STR).map_err(|err| anyhow::anyhow!("Sachgeschichte: {}", err))?;
-    let body = scraper::Html::parse_document(&body);
-    let links = body
-        .select(&LINK)
-        .filter_map(|o| o.value().attr("href"))
-        .filter_map(|o| BASE_URL.join(o).ok())
-        .collect::<Vec<_>>();
-    let mut videos = Vec::new();
-    for link in &links {
-        match get_themen_videos(Topic::Sachgeschichte, link) {
-            Ok(mut v) => {
-                videos.append(&mut v);
-                if videos.len() % 25 == 0 {
-                    println!("Sachgeschichten {:>4}/{}", videos.len(), links.len());
-                }
-            }
-            Err(err) => println!("{} {}", err, link),
-        };
-    }
-    if videos.is_empty() {
-        anyhow::bail!("Sachgeschichten: no videos");
-    }
-    Ok(videos)
 }
 
 fn get_video(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
