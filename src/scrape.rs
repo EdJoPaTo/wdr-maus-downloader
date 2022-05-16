@@ -8,6 +8,7 @@ use crate::wdr_media::WdrMedia;
 pub enum Topic {
     AktuelleSendung,
     Sachgeschichte,
+    Zukunft,
 }
 
 impl std::fmt::Display for Topic {
@@ -33,6 +34,7 @@ fn get(url: &str) -> anyhow::Result<String> {
 lazy_static::lazy_static! {
     static ref AKTUELLE: Url = Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap();
     static ref SACHGESCHICHTEN: Url = Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap();
+    static ref ZUKUNFT: Url = Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap();
 
     static ref VIDEOCONTAINER: Selector = Selector::parse(".videocontainer, .item.video").unwrap();
 }
@@ -42,12 +44,15 @@ pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
 }
 
 pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
-    get_linked_videos(Topic::Sachgeschichte, &SACHGESCHICHTEN)
+    let mut videos = Vec::new();
+    videos.append(&mut get_linked_videos(Topic::Zukunft, &ZUKUNFT)?);
+    videos.append(&mut get_linked_videos(Topic::Sachgeschichte, &SACHGESCHICHTEN)?);
+    Ok(videos)
 }
 
 fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
     lazy_static::lazy_static! {
-        static ref LINK: Selector = Selector::parse(".links .dynamicteaser a").unwrap();
+        static ref LINK: Selector = Selector::parse(".links a").unwrap();
     }
     let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {}", err))?;
     let body = scraper::Html::parse_document(&body);
