@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use regex::Regex;
 use scraper::{ElementRef, Selector};
 use url::Url;
@@ -31,13 +32,16 @@ fn get(url: &str) -> anyhow::Result<String> {
     Ok(body)
 }
 
-lazy_static::lazy_static! {
-    static ref AKTUELLE: Url = Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap();
-    static ref SACHGESCHICHTEN: Url = Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap();
-    static ref ZUKUNFT: Url = Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap();
+static AKTUELLE: Lazy<Url> =
+    Lazy::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
+static SACHGESCHICHTEN: Lazy<Url> = Lazy::new(|| {
+    Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap()
+});
+static ZUKUNFT: Lazy<Url> =
+    Lazy::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
 
-    static ref VIDEOCONTAINER: Selector = Selector::parse(".videocontainer, .item.video").unwrap();
-}
+static VIDEOCONTAINER: Lazy<Selector> =
+    Lazy::new(|| Selector::parse(".videocontainer, .item.video").unwrap());
 
 pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
     get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)
@@ -54,9 +58,8 @@ pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
 }
 
 fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
-    lazy_static::lazy_static! {
-        static ref LINK: Selector = Selector::parse(".links a").unwrap();
-    }
+    static LINK: Lazy<Selector> = Lazy::new(|| Selector::parse(".links a").unwrap());
+
     let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {}", err))?;
     let body = scraper::Html::parse_document(&body);
     let links = body
@@ -103,10 +106,9 @@ fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
 }
 
 fn get_video(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
-    lazy_static::lazy_static! {
-        static ref IMG: Selector = Selector::parse("img").unwrap();
-        static ref MEDIA_OBJECT: Regex = Regex::new(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#).unwrap();
-    }
+    static IMG: Lazy<Selector> = Lazy::new(|| Selector::parse("img").unwrap());
+    static MEDIA_OBJECT: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#).unwrap());
 
     let img = videocontainer
         .select(&IMG)

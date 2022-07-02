@@ -1209,7 +1209,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "frankenstein",
- "lazy_static",
+ "once_cell",
  "regex",
  "retry",
  "scraper",

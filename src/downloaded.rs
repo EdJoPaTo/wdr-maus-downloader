@@ -34,108 +34,107 @@ impl Downloaded {
 
 #[cfg(test)]
 mod tests {
+    use once_cell::sync::Lazy;
     use url::Url;
 
     use crate::wdr_media::{Captions, MediaFormat, MediaResource, MediaResources, TrackerData};
 
     use super::*;
 
-    lazy_static::lazy_static! {
-        static ref A0: WdrMedia = WdrMedia {
-            tracker_data: TrackerData {
-                id: "a".into(),
-                air_time: "42".into(),
-                title: "42".into(),
+    static A0: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+        tracker_data: TrackerData {
+            id: "a".into(),
+            air_time: "42".into(),
+            title: "42".into(),
+        },
+        media_resource: MediaResources {
+            preview_image: None,
+            dflt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
             },
-            media_resource: MediaResources {
-                preview_image: None,
-                dflt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                alt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                captions_hash: Captions { srt: None }
+            alt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
             },
-        };
-        static ref A1: WdrMedia = WdrMedia {
-            tracker_data: TrackerData {
-                id: "a".into(),
-                air_time: "42".into(),
-                title: "42".into(),
+            captions_hash: Captions { srt: None },
+        },
+    });
+    static A1: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+        tracker_data: TrackerData {
+            id: "a".into(),
+            air_time: "42".into(),
+            title: "42".into(),
+        },
+        media_resource: MediaResources {
+            preview_image: None,
+            dflt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: Url::parse("https://edjopato.de").ok(),
+                ad_video: None,
             },
-            media_resource: MediaResources {
-                preview_image: None,
-                dflt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: Url::parse("https://edjopato.de").ok(),
-                    ad_video: None,
-                },
-                alt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                captions_hash: Captions { srt: None }
+            alt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
             },
-        };
-        static ref A2: WdrMedia = WdrMedia {
-            tracker_data: TrackerData {
-                id: "a".into(),
-                air_time: "42".into(),
-                title: "42".into(),
+            captions_hash: Captions { srt: None },
+        },
+    });
+    static A2: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+        tracker_data: TrackerData {
+            id: "a".into(),
+            air_time: "42".into(),
+            title: "42".into(),
+        },
+        media_resource: MediaResources {
+            preview_image: None,
+            dflt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: Url::parse("https://edjopato.de").ok(),
+                ad_video: None,
             },
-            media_resource: MediaResources {
-                preview_image: None,
-                dflt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: Url::parse("https://edjopato.de").ok(),
-                    ad_video: None,
-                },
-                alt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                captions_hash: Captions {
-                    srt: Url::parse("https://edjopato.de").ok(),
-                }
+            alt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
             },
-        };
-        static ref B: WdrMedia = WdrMedia {
-            tracker_data: TrackerData {
-                id: "b".into(),
-                air_time: "42".into(),
-                title: "42".into(),
+            captions_hash: Captions {
+                srt: Url::parse("https://edjopato.de").ok(),
             },
-            media_resource: MediaResources {
-                preview_image: None,
-                dflt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                alt: MediaResource {
-                    media_format: MediaFormat::Mp4,
-                    video: Url::parse("https://edjopato.de").unwrap(),
-                    sl_video: None,
-                    ad_video: None,
-                },
-                captions_hash: Captions { srt: None }
+        },
+    });
+    static B: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+        tracker_data: TrackerData {
+            id: "b".into(),
+            air_time: "42".into(),
+            title: "42".into(),
+        },
+        media_resource: MediaResources {
+            preview_image: None,
+            dflt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
             },
-        };
-    }
+            alt: MediaResource {
+                media_format: MediaFormat::Mp4,
+                video: Url::parse("https://edjopato.de").unwrap(),
+                sl_video: None,
+                ad_video: None,
+            },
+            captions_hash: Captions { srt: None },
+        },
+    });
 
     #[test]
     fn score() {
