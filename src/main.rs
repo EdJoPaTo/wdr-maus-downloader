@@ -1,5 +1,4 @@
 #![forbid(unsafe_code)]
-#![allow(dead_code)]
 
 use retry::retry;
 use std::thread::sleep;
@@ -24,18 +23,9 @@ const SLEEPTIME: Duration = Duration::from_secs(60 * 20); // 20 min
 fn main() {
     let tg = Telegram::new();
 
-    #[cfg(not(debug_assertions))]
-    sleep(SLEEPTIME);
-
-    do_aktuelle(&tg).expect("startup do_aktuelle failed");
-
     loop {
         sleep(SLEEPTIME);
 
-        #[cfg(debug_assertions)]
-        do_sachgeschichte(&tg).unwrap();
-
-        #[cfg(not(debug_assertions))]
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {}", err);
             tg.send_err(&format!("ERROR {}", err));
