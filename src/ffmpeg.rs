@@ -58,7 +58,6 @@ fn get_tempfile(suffix: &str) -> std::io::Result<NamedTempFile> {
         .tempfile()
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct VideoStats {
     pub height: u16,
     pub width: u16,

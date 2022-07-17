@@ -13,7 +13,7 @@ pub enum Job {
     SachgeschichteEvening,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Deserialize)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Daily {
     day: NaiveDate,

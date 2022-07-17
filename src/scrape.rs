@@ -18,7 +18,6 @@ impl std::fmt::Display for Topic {
     }
 }
 
-#[derive(Debug)]
 pub struct Scraperesult {
     pub topic: Topic,
     pub img: Url,
