@@ -26,13 +26,16 @@ impl Telegram {
     pub fn new() -> Self {
         let bot_token = std::env::var("BOT_TOKEN").expect("set BOT_TOKEN via environment variable");
 
-        let api = if let Ok(api_root) = std::env::var("TELEGRAM_API_ROOT") {
-            println!("Telegram Bot custom api endpoint: {}", api_root);
-            Api::new_url(format!("{}/bot{}", api_root, bot_token))
-        } else {
-            println!("Telegram Bot uses official api");
-            Api::new(&bot_token)
-        };
+        let api = std::env::var("TELEGRAM_API_ROOT").map_or_else(
+            |_| {
+                println!("Telegram Bot uses official api");
+                Api::new(&bot_token)
+            },
+            |api_root| {
+                println!("Telegram Bot custom api endpoint: {}", api_root);
+                Api::new_url(format!("{}/bot{}", api_root, bot_token))
+            },
+        );
 
         let me = api.get_me().expect("Telegram get_me failed");
         println!(
