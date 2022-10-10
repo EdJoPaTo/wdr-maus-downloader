@@ -83,7 +83,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let air_time = &media.tracker_data.air_time;
     let video = media.media_resource.get_video();
     let sl = media.media_resource.get_sl_video();
-    let caption_srt = media.media_resource.captions_hash.srt.as_ref();
+    let mut caption_srt = media.media_resource.captions_hash.srt.as_ref();
     println!(
         "found {} to download {} {}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
         topic,
@@ -95,7 +95,12 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         caption_srt.map(url::Url::as_str)
     );
 
-    let public_caption = format!("{}\n{} #{}", title, air_time, topic,);
+    if caption_srt.map_or(false, |o| o.path().ends_with("deleted")) {
+        println!("Ignore caption as it ends with 'deleted'.");
+        caption_srt = None;
+    }
+
+    let public_caption = format!("{}\n{} #{}", title, air_time, topic);
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
