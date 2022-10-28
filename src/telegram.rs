@@ -32,8 +32,8 @@ impl Telegram {
                 Api::new(&bot_token)
             },
             |api_root| {
-                println!("Telegram Bot custom api endpoint: {}", api_root);
-                Api::new_url(format!("{}/bot{}", api_root, bot_token))
+                println!("Telegram Bot custom api endpoint: {api_root}");
+                Api::new_url(format!("{api_root}/bot{bot_token}"))
             },
         );
 
@@ -67,7 +67,7 @@ impl Telegram {
                     .photo(img.to_string())
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_photo {}", err))?
+            .map_err(|err| anyhow::anyhow!("Telegram::send_photo {err}"))?
             .result
             .message_id;
         Ok(message_id)
@@ -82,7 +82,7 @@ impl Telegram {
                     .reply_to_message_id(reply_to)
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_message {}", err))?;
+            .map_err(|err| anyhow::anyhow!("Telegram::send_message {err}"))?;
         Ok(())
     }
 
@@ -112,7 +112,7 @@ impl Telegram {
                     .media(media)
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {}", err))?;
+            .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {err}"))?;
         Ok(())
     }
 
@@ -126,8 +126,8 @@ impl Telegram {
                 .height(stats.height)
                 .build(),
             Err(err) => {
-                eprintln!("WARNING failed to get VideoStats: {}", err);
-                self.send_err(&format!("failed to get VideoStats: {}", err));
+                eprintln!("WARNING failed to get VideoStats: {err}");
+                self.send_err(&format!("failed to get VideoStats: {err}"));
                 InputMediaVideo::builder()
                     .media(path)
                     .supports_streaming(true)

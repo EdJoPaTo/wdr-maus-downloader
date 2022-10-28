@@ -90,7 +90,7 @@ where
 {
     let s = String::deserialize(deserializer)?;
     let url = if s.starts_with("//") {
-        format!("https:{}", s)
+        format!("https:{s}")
     } else {
         s
     };

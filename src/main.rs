@@ -27,8 +27,8 @@ fn main() {
         sleep(SLEEPTIME);
 
         if let Err(err) = iteration(&tg) {
-            println!("Iteration failed {}", err);
-            tg.send_err(&format!("ERROR {}", err));
+            println!("Iteration failed {err}");
+            tg.send_err(&format!("ERROR {err}"));
         }
     }
 }
@@ -85,10 +85,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let sl = media.media_resource.get_sl_video();
     let mut caption_srt = media.media_resource.captions_hash.srt.as_ref();
     println!(
-        "found {} to download {} {}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
-        topic,
-        air_time,
-        title,
+        "found {topic} to download {air_time} {title}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
         img.as_str(),
         video.as_str(),
         sl.map(url::Url::as_str),
@@ -100,7 +97,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         caption_srt = None;
     }
 
-    let public_caption = format!("{}\n{} #{}", title, air_time, topic);
+    let public_caption = format!("{title}\n{air_time} #{topic}");
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
@@ -136,7 +133,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
         tg.send_done(meta_msg, &meta_caption)
     })
-    .map_err(|err| anyhow::anyhow!("{}", err))?;
+    .map_err(|err| anyhow::anyhow!("{err}"))?;
     Ok(())
 }
 
@@ -148,7 +145,7 @@ fn format_duration(duration: Duration) -> String {
     let total_seconds = duration.as_secs_f64();
     let seconds = total_seconds % 60.0;
     let minutes = (total_seconds / 60.0).floor();
-    format!("{:.0} min {:.2} sec", minutes, seconds)
+    format!("{minutes:.0} min {seconds:.2} sec")
 }
 
 #[test]
@@ -160,7 +157,7 @@ fn format_duration_works() {
 #[allow(clippy::cast_precision_loss)]
 fn format_filesize(size: u64) -> String {
     let mb = (size as f32) / (1024.0 * 1024.0);
-    format!("{:3.1}MB", mb)
+    format!("{mb:3.1}MB")
 }
 
 #[test]

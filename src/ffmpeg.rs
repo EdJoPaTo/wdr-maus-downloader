@@ -42,10 +42,7 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
             .map(std::ffi::OsStr::to_string_lossy)
             .collect::<Vec<_>>()
             .join(" ");
-        anyhow::bail!(
-            "ffmpeg exited unsuccessfully. Commandline: {}",
-            command_line
-        );
+        anyhow::bail!("ffmpeg exited unsuccessfully. Commandline: {command_line}");
     }
 
     Ok(file)

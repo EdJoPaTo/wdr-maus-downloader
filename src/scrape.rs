@@ -14,7 +14,7 @@ pub enum Topic {
 
 impl std::fmt::Display for Topic {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -59,7 +59,7 @@ pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
 fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
     static LINK: Lazy<Selector> = Lazy::new(|| Selector::parse(".links a").unwrap());
 
-    let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {}", err))?;
+    let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {err}"))?;
     let body = scraper::Html::parse_document(&body);
     let links = body
         .select(&LINK)
@@ -72,10 +72,10 @@ fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
             Ok(mut v) => {
                 videos.append(&mut v);
                 if videos.len() % 25 == 0 {
-                    println!("{:>4}/{:<4} {}", videos.len(), links.len(), topic);
+                    println!("{:>4}/{:<4} {topic}", videos.len(), links.len());
                 }
             }
-            Err(err) => println!("{} {}", err, link),
+            Err(err) => println!("{err} {link}"),
         };
     }
     if videos.is_empty() {
@@ -101,7 +101,7 @@ fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
         }
         Ok(videos)
     }
-    inner(topic, base).map_err(|err| anyhow::anyhow!("{}: {}", topic, err))
+    inner(topic, base).map_err(|err| anyhow::anyhow!("{topic}: {err}"))
 }
 
 fn get_video(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
