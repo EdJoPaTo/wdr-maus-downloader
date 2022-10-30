@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 
-use retry::retry;
+use std::fmt::Write;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+
+use retry::retry;
 
 use crate::downloaded::Downloaded;
 use crate::scrape::Scraperesult;
@@ -110,6 +112,22 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let download_took = start.elapsed();
     println!("download took {}", format_duration(download_took));
 
+    let normal_filesize = path_filesize_string(normal.path()).expect("cant read video size");
+    let sl_filesize = sl.as_ref().map_or_else(
+        || "nope :(".into(),
+        |sl| path_filesize_string(sl.path()).expect("cant read video size"),
+    );
+    println!("Filesizes   Normal: {normal_filesize}   DGS: {sl_filesize}");
+
+    let mut meta_caption = format!(
+        "{public_caption}\n\nNormal: {normal_filesize}\nDGS: {sl_filesize}\n\ndownload took {}\n",
+        format_duration(download_took)
+    );
+    retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
+        tg.update_meta(meta_msg, &meta_caption)
+    })
+    .map_err(|err| anyhow::anyhow!("{err}"))?;
+
     let start = Instant::now();
     tg.send_public_result(
         &public_caption,
@@ -120,18 +138,9 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let upload_took = start.elapsed();
     println!("upload   took {}", format_duration(upload_took));
 
-    let meta_caption = format!(
-        "download took {}\nupload took {}\n\nNormal: {}\nDGS: {}",
-        format_duration(download_took),
-        format_duration(upload_took),
-        path_filesize_string(normal.path()).expect("cant read video size"),
-        sl.map_or_else(
-            || "nope :(".into(),
-            |sl| path_filesize_string(sl.path()).expect("cant read video size")
-        ),
-    );
+    writeln!(meta_caption, "upload took {}", format_duration(upload_took)).unwrap();
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
-        tg.send_done(meta_msg, &meta_caption)
+        tg.update_meta(meta_msg, &meta_caption)
     })
     .map_err(|err| anyhow::anyhow!("{err}"))?;
     Ok(())

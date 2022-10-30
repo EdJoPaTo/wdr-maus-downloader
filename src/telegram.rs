@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use frankenstein::{
-    Api, InputMediaPhoto, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
-    SendPhotoParams, TelegramApi,
+    Api, EditMessageCaptionParams, InputMediaPhoto, InputMediaVideo, Media, SendMediaGroupParams,
+    SendMessageParams, SendPhotoParams, TelegramApi,
 };
 use url::Url;
 
@@ -63,6 +63,7 @@ impl Telegram {
             .send_photo(
                 &SendPhotoParams::builder()
                     .chat_id(META_CHANNEL)
+                    .disable_notification(true)
                     .caption(text)
                     .photo(img.to_string())
                     .build(),
@@ -73,16 +74,16 @@ impl Telegram {
         Ok(message_id)
     }
 
-    pub fn send_done(&self, reply_to: i32, text: &str) -> anyhow::Result<()> {
+    pub fn update_meta(&self, msg_id: i32, text: &str) -> anyhow::Result<()> {
         self.api
-            .send_message(
-                &SendMessageParams::builder()
+            .edit_message_caption(
+                &EditMessageCaptionParams::builder()
                     .chat_id(META_CHANNEL)
-                    .text(text)
-                    .reply_to_message_id(reply_to)
+                    .message_id(msg_id)
+                    .caption(text)
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_message {err}"))?;
+            .map_err(|err| anyhow::anyhow!("Telegram::edit_message_caption {err}"))?;
         Ok(())
     }
 
