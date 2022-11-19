@@ -31,22 +31,19 @@ fn get(url: &str) -> anyhow::Result<String> {
     Ok(body)
 }
 
-static AKTUELLE: Lazy<Url> =
-    Lazy::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
-static SACHGESCHICHTEN: Lazy<Url> = Lazy::new(|| {
-    Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap()
-});
-static ZUKUNFT: Lazy<Url> =
-    Lazy::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
-
-static VIDEOCONTAINER: Lazy<Selector> =
-    Lazy::new(|| Selector::parse(".videocontainer, .item.video").unwrap());
-
 pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
-    get_themen_videos(Topic::AktuelleSendung, &AKTUELLE)
+    static AKTUELLE: Lazy<Url> =
+        Lazy::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
+    get_from_page(Topic::AktuelleSendung, &AKTUELLE)
 }
 
 pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
+    static SACHGESCHICHTEN: Lazy<Url> = Lazy::new(|| {
+        Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap()
+    });
+    static ZUKUNFT: Lazy<Url> =
+        Lazy::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
+
     let mut videos = Vec::new();
     videos.append(&mut get_linked_videos(Topic::Zukunft, &ZUKUNFT)?);
     videos.append(&mut get_linked_videos(
@@ -66,63 +63,68 @@ fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
         .filter_map(|o| o.value().attr("href"))
         .filter_map(|o| base.join(o).ok())
         .collect::<Vec<_>>();
-    let mut videos = Vec::new();
-    for link in &links {
-        match get_themen_videos(topic, link) {
-            Ok(mut v) => {
-                videos.append(&mut v);
-                if videos.len() % 25 == 0 {
-                    println!("{:>4}/{:<4} {topic}", videos.len(), links.len());
-                }
-            }
-            Err(err) => println!("{err} {link}"),
-        };
-    }
-    if videos.is_empty() {
-        anyhow::bail!("no linked videos");
-    }
+    let videos = get_many_pages(topic, &links);
+    anyhow::ensure!(!videos.is_empty(), "no linked videos");
     Ok(videos)
 }
 
-fn get_themen_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
-    fn inner(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
-        let body = get(base.as_str())?;
-        let body = scraper::Html::parse_document(&body);
-        let mut videos = Vec::new();
-        let containers = body.select(&VIDEOCONTAINER);
-        for container in containers {
-            let (img, media) = get_video(base, container)?;
-            videos.push(Scraperesult { topic, img, media });
-        }
-        if videos.is_empty() {
-            anyhow::bail!("no videos on {}", base.as_str());
-        } else if videos.len() > 1 {
-            println!("page has {} videos {}", videos.len(), base.as_str());
-        }
-        Ok(videos)
+fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
+    let total = links.len();
+    let mut videos = Vec::new();
+    for link in links {
+        match get_from_page(topic, link) {
+            Ok(mut v) => {
+                videos.append(&mut v);
+                if videos.len() % 25 == 0 {
+                    println!("{:>4}/{total:<4} {topic}", videos.len());
+                }
+            }
+            Err(err) => println!("{topic} {err} {link}"),
+        };
     }
-    inner(topic, base).map_err(|err| anyhow::anyhow!("{topic}: {err}"))
+    videos
 }
 
-fn get_video(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
-    static IMG: Lazy<Selector> = Lazy::new(|| Selector::parse("img").unwrap());
-    static MEDIA_OBJECT: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#).unwrap());
+fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
+    fn from_container(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
+        static IMG: Lazy<Selector> = Lazy::new(|| Selector::parse("img").unwrap());
+        static MEDIA_OBJECT: Lazy<Regex> =
+            Lazy::new(|| Regex::new(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#).unwrap());
 
-    let img = videocontainer
-        .select(&IMG)
-        .find_map(|e| e.value().attr("src"))
-        .ok_or_else(|| anyhow::anyhow!("img not found"))?;
-    let img = base.join(img)?;
+        let img = videocontainer
+            .select(&IMG)
+            .find_map(|e| e.value().attr("src"))
+            .ok_or_else(|| anyhow::anyhow!("img not found"))?;
+        let img = base.join(img)?;
 
-    let inner_html = videocontainer.inner_html();
-    let media_object_url = MEDIA_OBJECT
-        .find(&inner_html)
-        .ok_or_else(|| anyhow::anyhow!("media object url not found"))?
-        .as_str();
-    let media = get(media_object_url)?;
-    let begin = media.find('{').unwrap_or_default();
-    let media = media[begin..].trim_end_matches(&[')', ';']);
-    let media = serde_json::from_str::<WdrMedia>(media)?;
-    Ok((img, media))
+        let inner_html = videocontainer.inner_html();
+        let media_object_url = MEDIA_OBJECT
+            .find(&inner_html)
+            .ok_or_else(|| anyhow::anyhow!("media object url not found"))?
+            .as_str();
+        let media = get(media_object_url)?;
+        let begin = media.find('{').unwrap_or_default();
+        let media = media[begin..].trim_end_matches(&[')', ';']);
+        let media = serde_json::from_str::<WdrMedia>(media)?;
+        Ok((img, media))
+    }
+
+    static VIDEOCONTAINER: Lazy<Selector> =
+        Lazy::new(|| Selector::parse(".videocontainer, .item.video").unwrap());
+
+    let body = get(base.as_str())?;
+    let body = scraper::Html::parse_document(&body);
+
+    let mut videos = Vec::new();
+    let containers = body.select(&VIDEOCONTAINER);
+    for container in containers {
+        let (img, media) = from_container(base, container)?;
+        videos.push(Scraperesult { topic, img, media });
+    }
+    if videos.is_empty() {
+        anyhow::bail!("no videos on {}", base.as_str());
+    } else if videos.len() > 1 {
+        println!("page has {} videos {}", videos.len(), base.as_str());
+    }
+    Ok(videos)
 }
