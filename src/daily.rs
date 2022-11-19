@@ -20,27 +20,17 @@ pub struct Daily {
     jobs: HashMap<Job, bool>,
 }
 
-impl Default for Daily {
-    fn default() -> Self {
-        Self {
-            day: Local::today().naive_local(),
-            jobs: HashMap::new(),
-        }
-    }
-}
-
 impl Daily {
     pub fn new() -> Self {
-        let file: Self = std::fs::read_to_string(DAILY_PATH)
-            .map(|content| serde_yaml::from_str(&content).expect("daily.yaml format error"))
-            .unwrap_or_default();
-
-        let today = Local::today().naive_local();
-        if file.day == today {
-            file
-        } else {
-            Self::default()
-        }
+        let today = Local::now().date_naive();
+        std::fs::read_to_string(DAILY_PATH)
+            .map(|content| serde_yaml::from_str::<Self>(&content).expect("daily.yaml format error"))
+            .ok()
+            .filter(|file| file.day == today)
+            .unwrap_or_else(|| Self {
+                day: today,
+                jobs: HashMap::new(),
+            })
     }
 
     fn write(&self) {
