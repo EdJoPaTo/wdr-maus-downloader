@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 const DAILY_PATH: &str = "daily.yaml";
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub enum Job {
     AktuelleSunday,
     AktuelleCheckup,
@@ -14,7 +14,6 @@ pub enum Job {
 }
 
 #[derive(Serialize, Deserialize)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Daily {
     day: NaiveDate,
     jobs: HashMap<Job, bool>,
