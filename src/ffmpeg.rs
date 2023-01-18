@@ -68,9 +68,8 @@ impl VideoStats {
             Lazy::new(|| Regex::new(r"Duration: (\d{2}):(\d{2}):(\d{2})\.").unwrap());
         static RESOLUTION: Lazy<Regex> = Lazy::new(|| Regex::new(r", (\d+)x(\d+) \[").unwrap());
 
-        let output = Command::new("ffmpeg")
+        let output = Command::new("ffprobe")
             .arg("-hide_banner")
-            .arg("-i")
             .arg(path.as_os_str())
             .output()
             .expect("failed to execute ffmpeg");
