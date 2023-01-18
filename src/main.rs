@@ -7,14 +7,17 @@ use std::time::{Duration, Instant};
 use retry::retry;
 
 use crate::downloaded::Downloaded;
+use crate::image::get_thumbnail;
 use crate::scrape::Scraperesult;
 use crate::telegram::Telegram;
 
 mod daily;
 mod downloaded;
 mod ffmpeg;
+mod image;
 mod scrape;
 mod telegram;
+mod temporary;
 mod wdr_media;
 
 #[cfg(debug_assertions)]
@@ -103,6 +106,16 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
+    let thumbnail = get_thumbnail(img.as_str())?;
+    let thumbnail_took = start.elapsed();
+    let thumbnail_filesize =
+        path_filesize_string(thumbnail.path()).expect("cant read thumbnail size");
+    println!(
+        "thumbnail took {}  {thumbnail_filesize} / 200 kB",
+        format_duration(thumbnail_took)
+    );
+
+    let start = Instant::now();
     let normal = ffmpeg::download(video, caption_srt)?;
     let sl = if let Some(sl) = &sl {
         Some(ffmpeg::download(sl, caption_srt)?)
@@ -120,7 +133,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     println!("Filesizes   Normal: {normal_filesize}   DGS: {sl_filesize}");
 
     let mut meta_caption = format!(
-        "{public_caption}\n\nNormal: {normal_filesize}\nDGS: {sl_filesize}\n\ndownload took {}\n",
+        "{public_caption}\n\nThumbnail: {thumbnail_filesize} / 200 kB\nNormal: {normal_filesize}\nDGS: {sl_filesize}\n\ndownload took {}\n",
         format_duration(download_took)
     );
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
@@ -132,6 +145,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     tg.send_public_result(
         &public_caption,
         img,
+        thumbnail.path().to_path_buf(),
         normal.path().to_path_buf(),
         sl.as_ref().map(|o| o.path().to_path_buf()),
     )?;
@@ -165,12 +179,19 @@ fn format_duration_works() {
 
 #[allow(clippy::cast_precision_loss)]
 fn format_filesize(size: u64) -> String {
-    let mb = (size as f32) / (1024.0 * 1024.0);
+    let size = size as f32;
+    let kb = size / 1024.0;
+    if kb < 990.0 {
+        return format!("{kb:3.1}kB");
+    }
+    let mb = kb / 1024.0;
     format!("{mb:3.1}MB")
 }
 
 #[test]
 fn format_filesize_works() {
-    assert_eq!("0.0MB", format_filesize(0));
+    assert_eq!("0.0kB", format_filesize(0));
+    assert_eq!("12.1kB", format_filesize(12_345));
+    assert_eq!("120.6kB", format_filesize(123_456));
     assert_eq!("117.7MB", format_filesize(123_456_789));
 }

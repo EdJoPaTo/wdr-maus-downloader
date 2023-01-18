@@ -32,9 +32,10 @@ RUN cargo build --release --frozen --offline
 FROM docker.io/library/debian:bookworm-slim
 RUN apt-get update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y ffmpeg \
+	&& apt-get install -y ffmpeg imagemagick \
 	&& apt-get clean \
 	&& ffmpeg -version \
+	&& convert -version \
 	&& rm -rf /var/lib/apt/lists/* /var/cache/* /var/log/*
 
 WORKDIR /app

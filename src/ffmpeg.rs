@@ -6,6 +6,8 @@ use regex::Regex;
 use tempfile::NamedTempFile;
 use url::Url;
 
+use crate::temporary::get_tempfile;
+
 pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedTempFile> {
     let mut command = Command::new("nice");
     command
@@ -46,13 +48,6 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
     }
 
     Ok(file)
-}
-
-fn get_tempfile(suffix: &str) -> std::io::Result<NamedTempFile> {
-    tempfile::Builder::new()
-        .prefix("wdr-maus-")
-        .suffix(suffix)
-        .tempfile()
 }
 
 pub struct VideoStats {

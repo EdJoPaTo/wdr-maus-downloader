@@ -91,6 +91,7 @@ impl Telegram {
         &self,
         caption: &str,
         img: &Url,
+        thumbnail: PathBuf,
         normal: PathBuf,
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
@@ -101,10 +102,10 @@ impl Telegram {
                     .media(img.to_string())
                     .build(),
             ),
-            build_media_group_video(normal)?,
+            build_media_group_video(normal, Some(thumbnail))?,
         ];
         if let Some(sl) = sl {
-            media.push(build_media_group_video(sl)?);
+            media.push(build_media_group_video(sl, None)?);
         }
         self.api
             .send_media_group(
@@ -118,14 +119,18 @@ impl Telegram {
     }
 }
 
-fn build_media_group_video(path: PathBuf) -> anyhow::Result<Media> {
-    let stats = VideoStats::load(&path)?;
+fn build_media_group_video(media: PathBuf, thumbnail: Option<PathBuf>) -> anyhow::Result<Media> {
+    let stats = VideoStats::load(&media)?;
     let video = InputMediaVideo::builder()
-        .media(path)
+        .media(media)
         .supports_streaming(true)
         .duration(stats.duration)
         .width(stats.width)
-        .height(stats.height)
-        .build();
+        .height(stats.height);
+    let video = if let Some(thumbnail) = thumbnail {
+        video.thumb(thumbnail).build()
+    } else {
+        video.build()
+    };
     Ok(Media::Video(video))
 }
