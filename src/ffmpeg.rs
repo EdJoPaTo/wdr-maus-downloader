@@ -8,7 +8,7 @@ use url::Url;
 
 use crate::temporary::get_tempfile;
 
-pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedTempFile> {
+fn ffmpeg() -> Command {
     let mut command = Command::new("nice");
     command
         .stdin(Stdio::null())
@@ -18,25 +18,10 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
         .arg("ffmpeg")
         .arg("-y")
         .args(["-v", "error"]);
-
-    // Only short sample for faster finish
-    #[cfg(debug_assertions)]
-    command.args(["-t", "5"]);
-
-    command.args(["-i", video.as_ref()]);
-
-    if let Some(caption) = caption_srt {
-        command.args(["-i", caption.as_ref()]);
-    }
-
     command
-        .args(["-c", "copy"])
-        .args(["-c:s", "mov_text"])
-        .args(["-c:v", "libx265"]);
+}
 
-    let file = get_tempfile(".mp4")?;
-    command.arg(file.path().as_os_str());
-
+fn run_command(mut command: Command) -> anyhow::Result<()> {
     if !command.status()?.success() {
         let command_line = command
             .get_args()
@@ -46,8 +31,42 @@ pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedT
             .join(" ");
         anyhow::bail!("ffmpeg exited unsuccessfully. Commandline: {command_line}");
     }
+    Ok(())
+}
 
+pub fn download(video: &Url, caption_srt: Option<&Url>) -> anyhow::Result<NamedTempFile> {
+    let file = get_tempfile(".mp4")?;
+    let mut command = ffmpeg();
+
+    // Only short sample for faster finish
+    #[cfg(debug_assertions)]
+    command.args(["-t", "5"]);
+
+    command.args(["-i", video.as_ref()]);
+    if let Some(caption) = caption_srt {
+        command.args(["-i", caption.as_ref()]);
+    }
+
+    command
+        .args(["-c", "copy"])
+        .args(["-c:s", "mov_text"])
+        .args(["-c:v", "libx265"])
+        .arg(file.path().as_os_str());
+
+    run_command(command)?;
     Ok(file)
+}
+
+pub fn extract_video_thumbnail(input: &Path) -> anyhow::Result<NamedTempFile> {
+    let output = get_tempfile(".jpg")?;
+    let mut command = ffmpeg();
+    command
+        .arg("-i")
+        .arg(input.as_os_str())
+        .args(["-vf", "thumbnail", "-frames:v", "1"])
+        .arg(output.path().as_os_str());
+    run_command(command)?;
+    Ok(output)
 }
 
 pub struct VideoStats {

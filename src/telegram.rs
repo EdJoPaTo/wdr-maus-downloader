@@ -6,7 +6,8 @@ use frankenstein::{
 };
 use url::Url;
 
-use crate::ffmpeg::VideoStats;
+use crate::ffmpeg::{extract_video_thumbnail, VideoStats};
+use crate::image::resize_to_tg_thumbnail;
 
 #[cfg(not(debug_assertions))]
 const PUBLIC_CHANNEL: i64 = -1_001_155_474_248;
@@ -95,9 +96,11 @@ impl Telegram {
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
         if let Some(sl) = sl {
+            let sl_big_thumbnail = extract_video_thumbnail(sl.as_path())?;
+            let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
             let media = vec![
-                build_media_group_video(normal, caption, Some(thumbnail))?,
-                build_media_group_video(sl, "", None)?,
+                build_media_group_video(normal, caption, thumbnail)?,
+                build_media_group_video(sl, "", sl_tg_thumbnail.path().to_path_buf())?,
             ];
             self.api
                 .send_media_group(
@@ -131,20 +134,17 @@ impl Telegram {
 fn build_media_group_video(
     media: PathBuf,
     caption: &str,
-    thumbnail: Option<PathBuf>,
+    thumbnail: PathBuf,
 ) -> anyhow::Result<Media> {
     let stats = VideoStats::load(&media)?;
     let video = InputMediaVideo::builder()
         .supports_streaming(true)
         .media(media)
         .caption(caption)
+        .thumb(thumbnail)
         .duration(stats.duration)
         .width(stats.width)
-        .height(stats.height);
-    let video = if let Some(thumbnail) = thumbnail {
-        video.thumb(thumbnail).build()
-    } else {
-        video.build()
-    };
+        .height(stats.height)
+        .build();
     Ok(Media::Video(video))
 }

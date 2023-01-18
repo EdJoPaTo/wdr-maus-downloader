@@ -1,22 +1,24 @@
 use std::io::BufWriter;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 use tempfile::NamedTempFile;
+use url::Url;
 
 use crate::temporary::get_tempfile;
 
-pub fn get_thumbnail(url: &str) -> anyhow::Result<NamedTempFile> {
-    // TODO: maybe use image and/or imageproc crate
+pub fn download_jpg(url: &Url) -> anyhow::Result<NamedTempFile> {
+    let mut reader = ureq::get(url.as_str()).call()?.into_reader();
+    let file = get_tempfile(".jpg")?;
+    {
+        let mut writer = BufWriter::new(file.as_file());
+        std::io::copy(&mut reader, &mut writer)?;
+    }
+    Ok(file)
+}
 
-    let input = {
-        let mut reader = ureq::get(url).call()?.into_reader();
-        let file = get_tempfile(".jpg")?;
-        {
-            let mut writer = BufWriter::new(file.as_file());
-            std::io::copy(&mut reader, &mut writer)?;
-        }
-        file
-    };
+pub fn resize_to_tg_thumbnail(image: &Path) -> anyhow::Result<NamedTempFile> {
+    // TODO: maybe use image and/or imageproc crate
 
     let output = get_tempfile(".jpg")?;
 
@@ -26,7 +28,7 @@ pub fn get_thumbnail(url: &str) -> anyhow::Result<NamedTempFile> {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .arg("convert")
-        .arg(input.path().as_os_str())
+        .arg(image.as_os_str())
         .args(["-sampling-factor", "4:2:0"])
         .args(["-resize", "320x320>"])
         .arg(output.path().as_os_str());

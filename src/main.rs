@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 use retry::retry;
 
 use crate::downloaded::Downloaded;
-use crate::image::get_thumbnail;
+use crate::image::{download_jpg, resize_to_tg_thumbnail};
 use crate::scrape::Scraperesult;
 use crate::telegram::Telegram;
 
@@ -106,7 +106,10 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
-    let thumbnail = get_thumbnail(img.as_str())?;
+    let thumbnail = {
+        let img_downloaded = download_jpg(img)?;
+        resize_to_tg_thumbnail(img_downloaded.path())?
+    };
     let thumbnail_took = start.elapsed();
     let thumbnail_filesize =
         path_filesize_string(thumbnail.path()).expect("cant read thumbnail size");
