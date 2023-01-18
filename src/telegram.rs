@@ -101,10 +101,10 @@ impl Telegram {
                     .media(img.to_string())
                     .build(),
             ),
-            self.build_video(normal),
+            build_media_group_video(normal)?,
         ];
         if let Some(sl) = sl {
-            media.push(self.build_video(sl));
+            media.push(build_media_group_video(sl)?);
         }
         self.api
             .send_media_group(
@@ -116,25 +116,16 @@ impl Telegram {
             .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {err}"))?;
         Ok(())
     }
+}
 
-    fn build_video(&self, path: PathBuf) -> Media {
-        let video = match VideoStats::load(&path) {
-            Ok(stats) => InputMediaVideo::builder()
-                .media(path)
-                .supports_streaming(true)
-                .duration(stats.duration)
-                .width(stats.width)
-                .height(stats.height)
-                .build(),
-            Err(err) => {
-                eprintln!("WARNING failed to get VideoStats: {err}");
-                self.send_err(&format!("failed to get VideoStats: {err}"));
-                InputMediaVideo::builder()
-                    .media(path)
-                    .supports_streaming(true)
-                    .build()
-            }
-        };
-        Media::Video(video)
-    }
+fn build_media_group_video(path: PathBuf) -> anyhow::Result<Media> {
+    let stats = VideoStats::load(&path)?;
+    let video = InputMediaVideo::builder()
+        .media(path)
+        .supports_streaming(true)
+        .duration(stats.duration)
+        .width(stats.width)
+        .height(stats.height)
+        .build();
+    Ok(Media::Video(video))
 }
