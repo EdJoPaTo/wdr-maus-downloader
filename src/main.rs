@@ -144,7 +144,6 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let start = Instant::now();
     tg.send_public_result(
         &public_caption,
-        img,
         thumbnail.path().to_path_buf(),
         normal.path().to_path_buf(),
         sl.as_ref().map(|o| o.path().to_path_buf()),

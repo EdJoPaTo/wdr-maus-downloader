@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use frankenstein::{
-    Api, EditMessageCaptionParams, InputMediaPhoto, InputMediaVideo, Media, SendMediaGroupParams,
-    SendMessageParams, SendPhotoParams, TelegramApi,
+    Api, EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
+    SendPhotoParams, SendVideoParams, TelegramApi,
 };
 use url::Url;
 
@@ -90,40 +90,54 @@ impl Telegram {
     pub fn send_public_result(
         &self,
         caption: &str,
-        img: &Url,
         thumbnail: PathBuf,
         normal: PathBuf,
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
-        let mut media = vec![
-            Media::Photo(
-                InputMediaPhoto::builder()
-                    .caption(caption)
-                    .media(img.to_string())
-                    .build(),
-            ),
-            build_media_group_video(normal, Some(thumbnail))?,
-        ];
         if let Some(sl) = sl {
-            media.push(build_media_group_video(sl, None)?);
+            let media = vec![
+                build_media_group_video(normal, caption, Some(thumbnail))?,
+                build_media_group_video(sl, "", None)?,
+            ];
+            self.api
+                .send_media_group(
+                    &SendMediaGroupParams::builder()
+                        .chat_id(PUBLIC_CHANNEL)
+                        .media(media)
+                        .build(),
+                )
+                .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {err}"))?;
+        } else {
+            let stats = VideoStats::load(&normal)?;
+            self.api
+                .send_video(
+                    &SendVideoParams::builder()
+                        .supports_streaming(true)
+                        .chat_id(PUBLIC_CHANNEL)
+                        .video(normal)
+                        .caption(caption)
+                        .thumb(thumbnail)
+                        .duration(stats.duration)
+                        .width(stats.width)
+                        .height(stats.height)
+                        .build(),
+                )
+                .map_err(|err| anyhow::anyhow!("Telegram::send_video {err}"))?;
         }
-        self.api
-            .send_media_group(
-                &SendMediaGroupParams::builder()
-                    .chat_id(PUBLIC_CHANNEL)
-                    .media(media)
-                    .build(),
-            )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {err}"))?;
         Ok(())
     }
 }
 
-fn build_media_group_video(media: PathBuf, thumbnail: Option<PathBuf>) -> anyhow::Result<Media> {
+fn build_media_group_video(
+    media: PathBuf,
+    caption: &str,
+    thumbnail: Option<PathBuf>,
+) -> anyhow::Result<Media> {
     let stats = VideoStats::load(&media)?;
     let video = InputMediaVideo::builder()
-        .media(media)
         .supports_streaming(true)
+        .media(media)
+        .caption(caption)
         .duration(stats.duration)
         .width(stats.width)
         .height(stats.height);
