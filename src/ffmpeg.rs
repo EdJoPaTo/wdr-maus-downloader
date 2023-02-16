@@ -1,8 +1,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use once_cell::sync::Lazy;
-use regex::Regex;
+use lazy_regex::{lazy_regex, Lazy, Regex};
 use tempfile::NamedTempFile;
 use url::Url;
 
@@ -78,9 +77,8 @@ pub struct VideoStats {
 
 impl VideoStats {
     pub fn load(path: &Path) -> anyhow::Result<Self> {
-        static DURATION: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"Duration: (\d{2}):(\d{2}):(\d{2})\.").unwrap());
-        static RESOLUTION: Lazy<Regex> = Lazy::new(|| Regex::new(r", (\d+)x(\d+) \[").unwrap());
+        static DURATION: Lazy<Regex> = lazy_regex!(r"Duration: (\d{2}):(\d{2}):(\d{2})\.");
+        static RESOLUTION: Lazy<Regex> = lazy_regex!(r", (\d+)x(\d+) \[");
 
         let output = Command::new("ffprobe")
             .arg("-hide_banner")
