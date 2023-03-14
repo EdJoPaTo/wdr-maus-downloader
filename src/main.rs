@@ -60,10 +60,11 @@ fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo aktuelle…");
     let all = scrape::get_aktuell()?;
     let downloaded = Downloaded::new();
-    let all = all.iter().filter(|o| !downloaded.was_downloaded(&o.media));
-    for not_yet_downloaded in all {
-        handle_one(tg, not_yet_downloaded)?;
-        Downloaded::mark_downloaded(not_yet_downloaded.media.clone());
+    for o in all {
+        if !downloaded.was_downloaded(&o.media) {
+            handle_one(tg, &o)?;
+            Downloaded::mark_downloaded(o.media);
+        }
     }
     Ok(())
 }
@@ -73,9 +74,12 @@ fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
     let all = scrape::get_sachgeschichten()?;
     println!("found {} videos", all.len());
     let downloaded = Downloaded::new();
-    if let Some(not_yet_downloaded) = all.iter().find(|o| !downloaded.was_downloaded(&o.media)) {
-        handle_one(tg, not_yet_downloaded)?;
-        Downloaded::mark_downloaded(not_yet_downloaded.media.clone());
+    for o in all {
+        if !downloaded.was_downloaded(&o.media) {
+            handle_one(tg, &o)?;
+            Downloaded::mark_downloaded(o.media);
+            break;
+        }
     }
     Ok(())
 }
