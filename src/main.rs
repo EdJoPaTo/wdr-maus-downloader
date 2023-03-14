@@ -1,7 +1,6 @@
 #![forbid(unsafe_code)]
 
 use std::fmt::Write;
-use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use retry::retry;
@@ -20,21 +19,22 @@ mod telegram;
 mod temporary;
 mod wdr_media;
 
-#[cfg(debug_assertions)]
-const SLEEPTIME: Duration = Duration::from_secs(30);
-#[cfg(not(debug_assertions))]
-const SLEEPTIME: Duration = Duration::from_secs(60 * 20); // 20 min
-
 fn main() {
     let tg = Telegram::new();
 
+    #[allow(clippy::never_loop)]
     loop {
-        sleep(SLEEPTIME);
+        // Do not create load right on startup
+        #[cfg(not(debug_assertions))]
+        std::thread::sleep(Duration::from_secs(5 * 60)); // 5 min
 
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {err}");
             tg.send_err(&format!("ERROR {err}"));
         }
+
+        #[cfg(debug_assertions)]
+        break;
     }
 }
 
