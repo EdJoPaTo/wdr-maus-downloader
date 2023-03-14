@@ -12,8 +12,8 @@ pub enum Topic {
     Zukunft,
 }
 
-impl std::fmt::Display for Topic {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Topic {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }
