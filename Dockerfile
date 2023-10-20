@@ -20,13 +20,12 @@ RUN cargo build --release --frozen --offline
 
 
 # ffmpeg versions
-# alpine:3.15           4.4.1
-# alpine:3.16           5.0.1
-# alpine:3.17           5.1.2
-# alpine:edge           5.1.2
-# node:18-alpine        5.0.1
-# debian:bullseye-slim  4.3.5
-# debian:bookworm-slim  5.1.2
+# alpine:3.17           5.1.3
+# alpine:3.18           6.0
+# alpine:edge           6.0
+# debian:bookworm-slim  5.1.3
+# debian:trixie-slim    6.0
+# debian:sid-slim       6.0
 
 # Start building the final image
 FROM docker.io/library/debian:bookworm-slim
