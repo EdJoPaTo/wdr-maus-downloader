@@ -120,10 +120,10 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
         let (img, media) = from_container(base, container)?;
         videos.push(Scraperesult { topic, img, media });
     }
-    if videos.is_empty() {
-        anyhow::bail!("no videos on {}", base.as_str());
-    } else if videos.len() > 1 {
-        println!("page has {} videos {}", videos.len(), base.as_str());
+    match videos.len() {
+        0 => anyhow::bail!("no videos on {}", base.as_str()),
+        1 => {} // expected default
+        many => println!("page has {many} videos {}", base.as_str()),
     }
     Ok(videos)
 }
