@@ -1,4 +1,4 @@
-use lazy_regex::{lazy_regex, Regex};
+use lazy_regex::regex;
 use once_cell::sync::Lazy;
 use scraper::{ElementRef, Selector};
 use url::Url;
@@ -88,7 +88,6 @@ fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
 fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
     fn from_container(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
         static IMG: Lazy<Selector> = Lazy::new(|| Selector::parse("img").unwrap());
-        static MEDIA_OBJECT: Lazy<Regex> = lazy_regex!(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#);
 
         let img = videocontainer
             .select(&IMG)
@@ -97,7 +96,7 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
         let img = base.join(img)?;
 
         let inner_html = videocontainer.inner_html();
-        let media_object_url = MEDIA_OBJECT
+        let media_object_url = regex!(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#)
             .find(&inner_html)
             .ok_or_else(|| anyhow::anyhow!("media object url not found"))?
             .as_str();

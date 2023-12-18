@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use lazy_regex::{lazy_regex, Lazy, Regex};
+use lazy_regex::regex;
 use tempfile::NamedTempFile;
 use url::Url;
 
@@ -77,20 +77,17 @@ pub struct VideoStats {
 
 impl VideoStats {
     pub fn load(path: &Path) -> anyhow::Result<Self> {
-        static DURATION: Lazy<Regex> = lazy_regex!(r"Duration: (\d{2}):(\d{2}):(\d{2})\.");
-        static RESOLUTION: Lazy<Regex> = lazy_regex!(r", (\d+)x(\d+) \[");
-
         let output = Command::new("ffprobe")
             .arg("-hide_banner")
             .arg(path.as_os_str())
             .output()
-            .expect("failed to execute ffmpeg");
-        let output = String::from_utf8(output.stderr).expect("ffmpeg provided non utf8 output");
+            .expect("failed to execute ffprobe");
+        let output = String::from_utf8(output.stderr).expect("ffprobe provided non utf8 output");
 
         let duration = {
-            let captures = DURATION
+            let captures = regex!(r"Duration: (\d{2}):(\d{2}):(\d{2})\.")
                 .captures(&output)
-                .ok_or_else(|| anyhow::anyhow!("duration not found in ffmpeg output"))?;
+                .ok_or_else(|| anyhow::anyhow!("duration not found in ffprobe output"))?;
             let hours = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
             let minutes = captures.get(2).unwrap().as_str().parse::<u32>().unwrap();
             let seconds = captures.get(3).unwrap().as_str().parse::<u32>().unwrap();
@@ -98,9 +95,9 @@ impl VideoStats {
         };
 
         let (width, height) = {
-            let captures = RESOLUTION
+            let captures = regex!(r", (\d+)x(\d+) \[")
                 .captures(&output)
-                .ok_or_else(|| anyhow::anyhow!("resolution not found in ffmpeg output"))?;
+                .ok_or_else(|| anyhow::anyhow!("resolution not found in ffprobe output"))?;
             let width = captures.get(1).unwrap().as_str().parse::<u16>().unwrap();
             let height = captures.get(2).unwrap().as_str().parse::<u16>().unwrap();
             (width, height)
