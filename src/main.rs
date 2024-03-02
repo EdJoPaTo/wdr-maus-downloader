@@ -60,10 +60,10 @@ fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo aktuelle…");
     let all = scrape::get_aktuell()?;
     let downloaded = Downloaded::new();
-    for o in all {
-        if !downloaded.was_downloaded(&o.media) {
-            handle_one(tg, &o)?;
-            Downloaded::mark_downloaded(o.media);
+    for scraperesult in all {
+        if !downloaded.was_downloaded(&scraperesult.media) {
+            handle_one(tg, &scraperesult)?;
+            Downloaded::mark_downloaded(scraperesult.media);
         }
     }
     Ok(())
@@ -74,10 +74,10 @@ fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
     let all = scrape::get_sachgeschichten()?;
     println!("found {} videos", all.len());
     let downloaded = Downloaded::new();
-    for o in all {
-        if !downloaded.was_downloaded(&o.media) {
-            handle_one(tg, &o)?;
-            Downloaded::mark_downloaded(o.media);
+    for scraperesult in all {
+        if !downloaded.was_downloaded(&scraperesult.media) {
+            handle_one(tg, &scraperesult)?;
+            Downloaded::mark_downloaded(scraperesult.media);
             break;
         }
     }
@@ -101,7 +101,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         caption_srt.map(url::Url::as_str)
     );
 
-    if caption_srt.map_or(false, |o| o.path().ends_with("deleted")) {
+    if caption_srt.map_or(false, |url| url.path().ends_with("deleted")) {
         println!("Ignore caption as it ends with 'deleted'.");
         caption_srt = None;
     }
@@ -153,7 +153,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         &public_caption,
         thumbnail.path().to_path_buf(),
         normal.path().to_path_buf(),
-        sl.as_ref().map(|o| o.path().to_path_buf()),
+        sl.as_ref().map(|tempfile| tempfile.path().to_path_buf()),
     )?;
     let upload_took = start.elapsed();
     println!("upload   took {}", format_duration(upload_took));

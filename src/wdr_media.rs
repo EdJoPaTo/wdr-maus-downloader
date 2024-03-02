@@ -88,11 +88,11 @@ pub fn deserialize_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
-    let s = String::deserialize(deserializer)?;
-    let url = if s.starts_with("//") {
-        format!("https:{s}")
+    let str = String::deserialize(deserializer)?;
+    let url = if str.starts_with("//") {
+        format!("https:{str}")
     } else {
-        s
+        str
     };
     Url::parse(&url).map_err(serde::de::Error::custom)
 }

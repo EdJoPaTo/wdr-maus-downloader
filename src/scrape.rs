@@ -60,8 +60,8 @@ fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesul
     let body = scraper::Html::parse_document(&body);
     let links = body
         .select(&LINK)
-        .filter_map(|o| o.value().attr("href"))
-        .filter_map(|o| base.join(o).ok())
+        .filter_map(|elem| elem.value().attr("href"))
+        .filter_map(|href| base.join(href).ok())
         .collect::<Vec<_>>();
     let videos = get_many_pages(topic, &links);
     anyhow::ensure!(!videos.is_empty(), "no linked videos");
@@ -73,8 +73,8 @@ fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
     let mut videos = Vec::new();
     for link in links {
         match get_from_page(topic, link) {
-            Ok(mut v) => {
-                videos.append(&mut v);
+            Ok(mut vec) => {
+                videos.append(&mut vec);
                 if videos.len() % 25 == 0 {
                     println!("{:>4}/{total:<4} {topic}", videos.len());
                 }
@@ -91,7 +91,7 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
 
         let img = videocontainer
             .select(&IMG)
-            .find_map(|e| e.value().attr("src"))
+            .find_map(|elem| elem.value().attr("src"))
             .ok_or_else(|| anyhow::anyhow!("img not found"))?;
         let img = base.join(img)?;
 

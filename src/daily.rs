@@ -43,7 +43,7 @@ impl Daily {
     }
 
     fn is_done(&self, job: Job) -> bool {
-        self.jobs.get(&job).map_or(false, |o| *o)
+        self.jobs.get(&job).copied().unwrap_or(false)
     }
 
     pub fn get_next(&self) -> Option<Job> {

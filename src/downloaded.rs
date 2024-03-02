@@ -19,8 +19,8 @@ impl Downloaded {
         let new_score = media.media_resource.score();
         self.list
             .iter()
-            .filter(|o| o.tracker_data == media.tracker_data)
-            .any(|o| o.media_resource.score() >= new_score)
+            .filter(|wdrmedia| wdrmedia.tracker_data == media.tracker_data)
+            .any(|wdrmedia| wdrmedia.media_resource.score() >= new_score)
     }
 
     pub fn mark_downloaded(media: WdrMedia) {
@@ -32,6 +32,7 @@ impl Downloaded {
     }
 }
 
+#[allow(clippy::min_ident_chars)]
 #[cfg(test)]
 mod tests {
     use once_cell::sync::Lazy;
