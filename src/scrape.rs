@@ -13,8 +13,8 @@ pub enum Topic {
 }
 
 impl core::fmt::Display for Topic {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{self:?}")
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        core::fmt::Debug::fmt(self, fmt)
     }
 }
 
