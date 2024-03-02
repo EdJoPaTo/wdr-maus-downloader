@@ -1,5 +1,3 @@
-#![forbid(unsafe_code)]
-
 use std::fmt::Write;
 use std::time::{Duration, Instant};
 
