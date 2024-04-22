@@ -20,12 +20,13 @@ jobs:
   clippy:
     name: Clippy ${{ matrix.toolchain }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.toolchain == 'nightly' }}
+    continue-on-error: ${{ (matrix.toolchain == 'beta') || (matrix.toolchain == 'nightly') }}
     strategy:
       fail-fast: false
       matrix:
         toolchain:
           - stable
+          - beta
           - nightly
     env:
       RUSTFLAGS: --deny warnings
@@ -49,6 +50,7 @@ jobs:
       matrix:
         toolchain:
           - stable
+          - beta
           - nightly
         os:
           - ubuntu-latest
@@ -59,18 +61,14 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-
       - uses: actions/checkout@v4
       - run: cargo fetch --locked
       - run: cargo build --offline --all-targets
+      - run: cargo test --offline
 
-      - name: Run tests
-        run: cargo test --offline
-
-  github-release:
+  release:
     name: Release ${{ matrix.triple }}
     runs-on: ${{ matrix.os }}
-    needs: test
     permissions:
       contents: write
     strategy:
@@ -121,16 +119,6 @@ jobs:
         with:
           name: ${{ matrix.triple }}
           path: |
-            *.deb
-            *.rpm
-            *.tar.gz
-            *.zip
-
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
             *.deb
             *.rpm
             *.tar.gz
