@@ -38,9 +38,8 @@ mod tests {
     use once_cell::sync::Lazy;
     use url::Url;
 
-    use crate::wdr_media::{Captions, MediaFormat, MediaResource, MediaResources, TrackerData};
-
     use super::*;
+    use crate::wdr_media::{Captions, MediaFormat, MediaResource, MediaResources, TrackerData};
 
     static A0: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
         tracker_data: TrackerData {
