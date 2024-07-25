@@ -1,5 +1,6 @@
+use std::sync::LazyLock;
+
 use lazy_regex::regex;
-use once_cell::sync::Lazy;
 use scraper::{ElementRef, Selector};
 use url::Url;
 
@@ -32,17 +33,17 @@ fn get(url: &str) -> anyhow::Result<String> {
 }
 
 pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
-    static AKTUELLE: Lazy<Url> =
-        Lazy::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
+    static AKTUELLE: LazyLock<Url> =
+        LazyLock::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
     get_from_page(Topic::AktuelleSendung, &AKTUELLE)
 }
 
 pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
-    static SACHGESCHICHTEN: Lazy<Url> = Lazy::new(|| {
+    static SACHGESCHICHTEN: LazyLock<Url> = LazyLock::new(|| {
         Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap()
     });
-    static ZUKUNFT: Lazy<Url> =
-        Lazy::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
+    static ZUKUNFT: LazyLock<Url> =
+        LazyLock::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
 
     let mut videos = Vec::new();
     videos.append(&mut get_linked_videos(Topic::Zukunft, &ZUKUNFT)?);
@@ -54,7 +55,7 @@ pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
 }
 
 fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
-    static LINK: Lazy<Selector> = Lazy::new(|| Selector::parse(".links a").unwrap());
+    static LINK: LazyLock<Selector> = LazyLock::new(|| Selector::parse(".links a").unwrap());
 
     let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {err}"))?;
     let body = scraper::Html::parse_document(&body);
@@ -87,7 +88,7 @@ fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
 
 fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
     fn from_container(base: &Url, videocontainer: ElementRef) -> anyhow::Result<(Url, WdrMedia)> {
-        static IMG: Lazy<Selector> = Lazy::new(|| Selector::parse("img").unwrap());
+        static IMG: LazyLock<Selector> = LazyLock::new(|| Selector::parse("img").unwrap());
 
         let img = videocontainer
             .select(&IMG)
@@ -108,8 +109,8 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
         Ok((img, media))
     }
 
-    static VIDEOCONTAINER: Lazy<Selector> =
-        Lazy::new(|| Selector::parse(".videocontainer, .item.video").unwrap());
+    static VIDEOCONTAINER: LazyLock<Selector> =
+        LazyLock::new(|| Selector::parse(".videocontainer, .item.video").unwrap());
 
     let body = get(base.as_str())?;
     let body = scraper::Html::parse_document(&body);

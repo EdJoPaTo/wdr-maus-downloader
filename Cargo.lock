@@ -1169,7 +1169,6 @@ dependencies = [
  "chrono",
  "frankenstein",
  "lazy-regex",
- "once_cell",
  "retry",
  "scraper",
  "serde",

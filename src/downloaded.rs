@@ -35,13 +35,14 @@ impl Downloaded {
 #[allow(clippy::min_ident_chars)]
 #[cfg(test)]
 mod tests {
-    use once_cell::sync::Lazy;
+    use std::sync::LazyLock;
+
     use url::Url;
 
     use super::*;
     use crate::wdr_media::{Captions, MediaFormat, MediaResource, MediaResources, TrackerData};
 
-    static A0: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+    static A0: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
             air_time: "42".into(),
@@ -64,7 +65,7 @@ mod tests {
             captions_hash: Captions { srt: None },
         },
     });
-    static A1: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+    static A1: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
             air_time: "42".into(),
@@ -87,7 +88,7 @@ mod tests {
             captions_hash: Captions { srt: None },
         },
     });
-    static A2: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+    static A2: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
             air_time: "42".into(),
@@ -112,7 +113,7 @@ mod tests {
             },
         },
     });
-    static B: Lazy<WdrMedia> = Lazy::new(|| WdrMedia {
+    static B: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "b".into(),
             air_time: "42".into(),
