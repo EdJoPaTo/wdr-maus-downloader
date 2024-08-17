@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use anyhow::Context;
 use frankenstein::{
     Api, EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
     SendPhotoParams, SendVideoParams, TelegramApi,
@@ -69,7 +70,7 @@ impl Telegram {
                     .photo(img.to_string())
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::send_photo {err}"))?
+            .context("Telegram::send_photo")?
             .result
             .message_id;
         Ok(message_id)
@@ -84,7 +85,7 @@ impl Telegram {
                     .caption(text)
                     .build(),
             )
-            .map_err(|err| anyhow::anyhow!("Telegram::edit_message_caption {err}"))?;
+            .context("Telegram::edit_message_caption")?;
         Ok(())
     }
 
@@ -109,7 +110,7 @@ impl Telegram {
                         .media(media)
                         .build(),
                 )
-                .map_err(|err| anyhow::anyhow!("Telegram::send_media_group {err}"))?;
+                .context("Telegram::send_media_group")?;
         } else {
             let stats = VideoStats::load(&normal)?;
             self.api
@@ -125,7 +126,7 @@ impl Telegram {
                         .height(stats.height)
                         .build(),
                 )
-                .map_err(|err| anyhow::anyhow!("Telegram::send_video {err}"))?;
+                .context("Telegram::send_video")?;
         }
         Ok(())
     }

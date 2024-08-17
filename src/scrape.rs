@@ -1,5 +1,6 @@
 use std::sync::LazyLock;
 
+use anyhow::Context;
 use lazy_regex::regex;
 use scraper::{ElementRef, Selector};
 use url::Url;
@@ -57,7 +58,7 @@ pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
 fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
     static LINK: LazyLock<Selector> = LazyLock::new(|| Selector::parse(".links a").unwrap());
 
-    let body = get(base.as_ref()).map_err(|err| anyhow::anyhow!("LinkedVideos: {err}"))?;
+    let body = get(base.as_ref()).context("LinkedVideos")?;
     let body = scraper::Html::parse_document(&body);
     let links = body
         .select(&LINK)
@@ -80,7 +81,7 @@ fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
                     println!("{:>4}/{total:<4} {topic}", videos.len());
                 }
             }
-            Err(err) => println!("{topic} {err} {link}"),
+            Err(err) => println!("{topic} scrape {link} failed: {err:#}"),
         };
     }
     videos
@@ -122,9 +123,9 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
         videos.push(Scraperesult { topic, img, media });
     }
     match videos.len() {
-        0 => anyhow::bail!("no videos on {}", base.as_str()),
+        0 => anyhow::bail!("no videos"),
         1 => {} // expected default
-        many => println!("page has {many} videos {}", base.as_str()),
+        many => println!("page has {many} videos"),
     }
     Ok(videos)
 }

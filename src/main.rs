@@ -1,6 +1,7 @@
 use std::fmt::Write;
 use std::time::{Duration, Instant};
 
+use anyhow::Context;
 use retry::retry;
 
 use crate::downloaded::Downloaded;
@@ -27,8 +28,8 @@ fn main() {
         std::thread::sleep(Duration::from_secs(5 * 60)); // 5 min
 
         if let Err(err) = iteration(&tg) {
-            println!("Iteration failed {err}");
-            tg.send_err(&format!("ERROR {err}"));
+            println!("Iteration failed {err:#}");
+            tg.send_err(&format!("ERROR {err:#}"));
         }
 
         #[cfg(debug_assertions)]
@@ -56,11 +57,11 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
 
 fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo aktuelle…");
-    let all = scrape::get_aktuell()?;
+    let all = scrape::get_aktuell().context("Failed to scrape aktuelle")?;
     let downloaded = Downloaded::new();
     for scraperesult in all {
         if !downloaded.was_downloaded(&scraperesult.media) {
-            handle_one(tg, &scraperesult)?;
+            handle_one(tg, &scraperesult).context("Failed to download aktuelle")?;
             Downloaded::mark_downloaded(scraperesult.media);
         }
     }
@@ -69,12 +70,12 @@ fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
 
 fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
     println!("\n\ndo sachgeschichten…");
-    let all = scrape::get_sachgeschichten()?;
+    let all = scrape::get_sachgeschichten().context("Failed to scrape Sachgeschichten")?;
     println!("found {} videos", all.len());
     let downloaded = Downloaded::new();
     for scraperesult in all {
         if !downloaded.was_downloaded(&scraperesult.media) {
-            handle_one(tg, &scraperesult)?;
+            handle_one(tg, &scraperesult).context("Failed to download Sachgeschichte")?;
             Downloaded::mark_downloaded(scraperesult.media);
             break;
         }
