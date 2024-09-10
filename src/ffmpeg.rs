@@ -69,8 +69,8 @@ pub fn extract_video_thumbnail(input: &Path) -> anyhow::Result<NamedTempFile> {
 }
 
 pub struct VideoStats {
-    pub height: u16,
-    pub width: u16,
+    pub height: u32,
+    pub width: u32,
     /// In seconds
     pub duration: u32,
 }
@@ -98,8 +98,8 @@ impl VideoStats {
             let captures = regex!(r", (\d+)x(\d+) \[")
                 .captures(&output)
                 .ok_or_else(|| anyhow::anyhow!("resolution not found in ffprobe output"))?;
-            let width = captures.get(1).unwrap().as_str().parse::<u16>().unwrap();
-            let height = captures.get(2).unwrap().as_str().parse::<u16>().unwrap();
+            let width = captures.get(1).unwrap().as_str().parse().unwrap();
+            let height = captures.get(2).unwrap().as_str().parse().unwrap();
             (width, height)
         };
 
