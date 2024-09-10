@@ -145,7 +145,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
         tg.update_meta(meta_msg, &meta_caption)
     })
-    .map_err(|err| anyhow::anyhow!("{err}"))?;
+    .map_err(anyhow::Error::msg)?;
 
     let start = Instant::now();
     tg.send_public_result(
@@ -161,7 +161,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
         tg.update_meta(meta_msg, &meta_caption)
     })
-    .map_err(|err| anyhow::anyhow!("{err}"))?;
+    .map_err(anyhow::Error::msg)?;
     Ok(())
 }
 
