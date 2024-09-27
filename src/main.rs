@@ -52,9 +52,16 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         .context("Failed to scrape")?;
         println!("found {} videos", all.len());
         for scraperesult in all {
-            if !downloaded.was_downloaded(&scraperesult.media) {
-                handle_one(tg, &scraperesult).context("Failed to download")?;
-                Downloaded::mark_downloaded(scraperesult.media);
+            if !downloaded.was_downloaded(&scraperesult.media)
+                && !daily.is_error(&scraperesult.media)
+            {
+                match handle_one(tg, &scraperesult).context("Failed to download") {
+                    Ok(()) => Downloaded::mark_downloaded(scraperesult.media),
+                    Err(err) => {
+                        daily.mark_error(scraperesult.media);
+                        return Err(err);
+                    }
+                }
                 if !matches!(job, Job::AktuelleCheckup | Job::AktuelleSunday) {
                     break;
                 }
