@@ -41,44 +41,26 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
     use crate::daily::{Daily, Job};
     let mut daily = Daily::new();
     if let Some(job) = daily.get_next() {
-        match job {
-            Job::AktuelleSunday | Job::AktuelleCheckup => {
-                do_aktuelle(tg)?;
-                daily.mark_successful(job);
-            }
+        println!("\n\ndo {job:?}…");
+        let downloaded = Downloaded::new();
+        let all = match job {
+            Job::AktuelleSunday | Job::AktuelleCheckup => scrape::get_aktuell(),
             Job::SachgeschichteMorning | Job::SachgeschichteEvening => {
-                do_sachgeschichte(tg)?;
-                daily.mark_successful(job);
+                scrape::get_sachgeschichten()
             }
         }
-    }
-    Ok(())
-}
-
-fn do_aktuelle(tg: &Telegram) -> anyhow::Result<()> {
-    println!("\n\ndo aktuelle…");
-    let all = scrape::get_aktuell().context("Failed to scrape aktuelle")?;
-    let downloaded = Downloaded::new();
-    for scraperesult in all {
-        if !downloaded.was_downloaded(&scraperesult.media) {
-            handle_one(tg, &scraperesult).context("Failed to download aktuelle")?;
-            Downloaded::mark_downloaded(scraperesult.media);
+        .context("Failed to scrape")?;
+        println!("found {} videos", all.len());
+        for scraperesult in all {
+            if !downloaded.was_downloaded(&scraperesult.media) {
+                handle_one(tg, &scraperesult).context("Failed to download")?;
+                Downloaded::mark_downloaded(scraperesult.media);
+                if !matches!(job, Job::AktuelleCheckup | Job::AktuelleSunday) {
+                    break;
+                }
+            }
         }
-    }
-    Ok(())
-}
-
-fn do_sachgeschichte(tg: &Telegram) -> anyhow::Result<()> {
-    println!("\n\ndo sachgeschichten…");
-    let all = scrape::get_sachgeschichten().context("Failed to scrape Sachgeschichten")?;
-    println!("found {} videos", all.len());
-    let downloaded = Downloaded::new();
-    for scraperesult in all {
-        if !downloaded.was_downloaded(&scraperesult.media) {
-            handle_one(tg, &scraperesult).context("Failed to download Sachgeschichte")?;
-            Downloaded::mark_downloaded(scraperesult.media);
-            break;
-        }
+        daily.mark_successful(job);
     }
     Ok(())
 }
