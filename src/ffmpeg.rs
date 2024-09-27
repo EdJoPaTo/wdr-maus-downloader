@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
+use anyhow::Context;
 use lazy_regex::regex;
 use tempfile::NamedTempFile;
 use url::Url;
@@ -87,7 +88,7 @@ impl VideoStats {
         let duration = {
             let captures = regex!(r"Duration: (\d{2}):(\d{2}):(\d{2})\.")
                 .captures(&output)
-                .ok_or_else(|| anyhow::anyhow!("duration not found in ffprobe output"))?;
+                .context("duration not found in ffprobe output")?;
             let hours = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
             let minutes = captures.get(2).unwrap().as_str().parse::<u32>().unwrap();
             let seconds = captures.get(3).unwrap().as_str().parse::<u32>().unwrap();
@@ -97,7 +98,7 @@ impl VideoStats {
         let (width, height) = {
             let captures = regex!(r", (\d+)x(\d+) \[")
                 .captures(&output)
-                .ok_or_else(|| anyhow::anyhow!("resolution not found in ffprobe output"))?;
+                .context("resolution not found in ffprobe output")?;
             let width = captures.get(1).unwrap().as_str().parse().unwrap();
             let height = captures.get(2).unwrap().as_str().parse().unwrap();
             (width, height)

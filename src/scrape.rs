@@ -94,13 +94,13 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
         let img = videocontainer
             .select(&IMG)
             .find_map(|elem| elem.value().attr("src"))
-            .ok_or_else(|| anyhow::anyhow!("img not found"))?;
+            .context("img not found")?;
         let img = base.join(img)?;
 
         let inner_html = videocontainer.inner_html();
         let media_object_url = regex!(r#"https?:[^'"]+\d+\.(?:js|assetjsonp)"#)
             .find(&inner_html)
-            .ok_or_else(|| anyhow::anyhow!("media object url not found"))?
+            .context("media object url not found")?
             .as_str();
         let media = get(media_object_url)?;
         let begin = media.find('{').unwrap_or_default();
