@@ -3,5 +3,6 @@
 /systemd
 /target
 Dockerfile
+rustfmt.toml
 
 /*.yaml
