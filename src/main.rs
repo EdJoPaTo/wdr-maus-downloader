@@ -89,7 +89,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         caption_srt.map(url::Url::as_str)
     );
 
-    if caption_srt.map_or(false, |url| url.path().ends_with("deleted")) {
+    if caption_srt.is_some_and(|url| url.path().ends_with("deleted")) {
         println!("Ignore caption as it ends with 'deleted'.");
         caption_srt = None;
     }
