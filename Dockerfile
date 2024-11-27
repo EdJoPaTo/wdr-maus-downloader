@@ -40,5 +40,5 @@ WORKDIR /app
 ENV TZ=Europe/Berlin
 VOLUME /app
 
-COPY --from=builder /build/target/release/wdr-maus-downloader /usr/bin/
+COPY --from=builder /build/target/release/wdr-maus-downloader /usr/local/bin/
 ENTRYPOINT ["wdr-maus-downloader"]
