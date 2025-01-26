@@ -9,27 +9,25 @@ use url::Url;
 use crate::temporary::get_tempfile;
 
 fn ffmpeg() -> Command {
-    let mut command = Command::new("nice");
+    let mut command = Command::new("ffmpeg");
     command
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .args(["-n", "15"])
-        .arg("ffmpeg")
         .arg("-y")
         .args(["-v", "error"]);
     command
 }
 
 fn run_command(mut command: Command) -> anyhow::Result<()> {
-    if !command.status()?.success() {
-        let command_line = command
+    let status = command.status().expect("failed to execute ffmpeg");
+    if !status.success() {
+        let args = command
             .get_args()
-            .skip(2)
             .map(std::ffi::OsStr::to_string_lossy)
             .collect::<Vec<_>>()
             .join(" ");
-        anyhow::bail!("ffmpeg exited unsuccessfully. Commandline: {command_line}");
+        anyhow::bail!("ffmpeg exited unsuccessfully. Args: {args}");
     }
     Ok(())
 }

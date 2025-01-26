@@ -22,25 +22,24 @@ pub fn resize_to_tg_thumbnail(image: &Path) -> anyhow::Result<NamedTempFile> {
 
     let output = get_tempfile(".jpg")?;
 
-    let mut command = Command::new("nice");
+    let mut command = Command::new("convert");
     command
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .arg("convert")
         .arg(image.as_os_str())
         .args(["-sampling-factor", "4:2:0"])
         .args(["-resize", "320x320>"])
         .arg(output.path().as_os_str());
 
-    if !command.status()?.success() {
-        let command_line = command
+    let status = command.status().expect("failed to execute ImageMagick");
+    if !status.success() {
+        let args = command
             .get_args()
-            .skip(2)
             .map(std::ffi::OsStr::to_string_lossy)
             .collect::<Vec<_>>()
             .join(" ");
-        anyhow::bail!("ImageMagick exited unsuccessfully. Commandline: {command_line}");
+        anyhow::bail!("ImageMagick exited unsuccessfully. Args: {args}");
     }
 
     Ok(output)
