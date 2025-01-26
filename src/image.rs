@@ -22,7 +22,7 @@ pub fn resize_to_tg_thumbnail(image: &Path) -> anyhow::Result<NamedTempFile> {
 
     let output = get_tempfile(".jpg")?;
 
-    let mut command = Command::new("convert");
+    let mut command = Command::new("magick");
     command
         .stdin(Stdio::null())
         .stdout(Stdio::null())

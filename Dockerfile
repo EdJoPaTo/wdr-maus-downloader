@@ -1,9 +1,7 @@
-FROM docker.io/library/rust:1-bookworm AS builder
+FROM docker.io/library/rust:1-alpine AS builder
 WORKDIR /build
-RUN apt-get update \
-	&& apt-get upgrade -y \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apk upgrade --no-cache \
+	&& apk add --no-cache musl-dev
 
 COPY Cargo.toml Cargo.lock ./
 
@@ -18,23 +16,11 @@ COPY . ./
 RUN cargo build --release --frozen --offline
 
 
-# ffmpeg versions
-# alpine:3.17           5.1.3
-# alpine:3.18           6.0
-# alpine:edge           6.0
-# debian:bookworm-slim  5.1.3
-# debian:trixie-slim    6.0
-# debian:sid-slim       6.0
-
-# Start building the final image
-FROM docker.io/library/debian:bookworm-slim AS final
-RUN apt-get update \
-	&& apt-get upgrade -y \
-	&& apt-get install -y ffmpeg imagemagick \
-	&& apt-get clean \
+FROM docker.io/library/alpine:3 AS final
+RUN apk upgrade --no-cache \
+	&& apk add --no-cache ffmpeg imagemagick \
 	&& ffmpeg -version \
-	&& convert -version \
-	&& rm -rf /var/lib/apt/lists/* /var/cache/* /var/log/*
+	&& magick -version
 
 WORKDIR /app
 ENV TZ=Europe/Berlin
