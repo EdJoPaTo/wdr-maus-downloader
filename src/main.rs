@@ -82,7 +82,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let sl = media.media_resource.get_sl_video();
     let mut caption_srt = media.media_resource.captions_hash.srt.as_ref();
     println!(
-        "found {topic} to download {air_time} {title}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
+        "found {topic} to download {title}\nAir Time: {air_time:?}\nImage: {}\nVideo: {}\nSign Language: {:?}\nCaptions: {:?}",
         img.as_str(),
         video.as_str(),
         sl.map(url::Url::as_str),
@@ -94,7 +94,10 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         caption_srt = None;
     }
 
-    let public_caption = format!("{title}\n{air_time} #{topic}");
+    let public_caption = air_time.as_ref().map_or_else(
+        || format!("{title}\n#{topic}"),
+        |air_time| format!("{title}\n{air_time} #{topic}"),
+    );
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();

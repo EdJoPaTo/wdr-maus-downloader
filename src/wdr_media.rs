@@ -15,7 +15,7 @@ pub struct TrackerData {
     pub id: String,
 
     #[serde(alias = "trackerClipAirTime")]
-    pub air_time: String,
+    pub air_time: Option<String>,
 
     #[serde(alias = "trackerClipTitle")]
     pub title: String,
@@ -205,6 +205,35 @@ fn sendung_example() {
         "trackerClipMeFoId": "X004611689",
         "trackerClipSubcategory": "Die Sendung mit der Maus",
         "trackerClipTitle": "Die Sendung vom 21.11.2021"
+    }
+}"#;
+    let media = serde_json::from_str::<WdrMedia>(json).unwrap();
+    dbg!(media);
+    // todo!();
+}
+
+#[test]
+fn kuh_lena() {
+    let json = r#"{
+    "mediaVersion": "1.4.0",
+    "mediaType": "vod",
+    "mediaResource": {
+        "dflt": {
+            "videoURL": "//wdradaptiv-vh.akamaihd.net/i/medp/ondemand/weltweit/fsk0/140/1407836/,1407836_16311311,1407836_16311312,1407836_16311313,1407836_16311314,1407836_16311315,.mp4.csmil/master.m3u8",
+            "mediaFormat": "hls"
+        },
+        "alt": {
+            "videoURL": "//wdradaptiv-vh.akamaihd.net/i/medp/ondemand/weltweit/fsk0/140/1407836/,1407836_16311311,1407836_16311312,1407836_16311313,1407836_16311314,1407836_16311315,.mp4.csmil/master.m3u8",
+            "mediaFormat": "hls"
+        },
+        "captionsHash": {},
+        "previewImage": "http://www1.wdr.de/kinder/tv/die-sendung-mit-der-maus/-sachgeschichte-lenas-sommer-auf-der-alpe-teil--100~_v-%%FORMAT%%.jpg"
+    },
+    "trackerData": {
+        "trackerClipId": "mdb-1407836",
+        "trackerClipTitle": "Lenas Sommer auf der Alpe",
+        "trackerClipIsTrailer": "0",
+        "trackerClipIsWebOnly": "1"
     }
 }"#;
     let media = serde_json::from_str::<WdrMedia>(json).unwrap();

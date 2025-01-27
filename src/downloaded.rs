@@ -45,7 +45,7 @@ mod tests {
     static A0: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
-            air_time: "42".into(),
+            air_time: None,
             title: "42".into(),
         },
         media_resource: MediaResources {
@@ -68,7 +68,7 @@ mod tests {
     static A1: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
-            air_time: "42".into(),
+            air_time: None,
             title: "42".into(),
         },
         media_resource: MediaResources {
@@ -91,7 +91,7 @@ mod tests {
     static A2: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "a".into(),
-            air_time: "42".into(),
+            air_time: None,
             title: "42".into(),
         },
         media_resource: MediaResources {
@@ -116,7 +116,7 @@ mod tests {
     static B: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "b".into(),
-            air_time: "42".into(),
+            air_time: None,
             title: "42".into(),
         },
         media_resource: MediaResources {
