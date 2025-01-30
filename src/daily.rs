@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{Datelike, Local, NaiveDate, Timelike, Weekday};
+use chrono::{Datelike as _, Local, NaiveDate, Timelike as _, Weekday};
 use serde::{Deserialize, Serialize};
 
 use crate::wdr_media::WdrMedia;

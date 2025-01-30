@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use anyhow::Context;
+use anyhow::Context as _;
 use lazy_regex::regex;
 use tempfile::NamedTempFile;
 use url::Url;

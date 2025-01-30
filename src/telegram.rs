@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use frankenstein::{
     Api, EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
-    SendPhotoParams, SendVideoParams, TelegramApi,
+    SendPhotoParams, SendVideoParams, TelegramApi as _,
 };
 use url::Url;
 

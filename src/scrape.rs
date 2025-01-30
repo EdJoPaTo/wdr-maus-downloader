@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use lazy_regex::regex;
 use scraper::{ElementRef, Selector};
 use url::Url;

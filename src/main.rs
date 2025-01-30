@@ -1,7 +1,7 @@
-use std::fmt::Write;
+use std::fmt::Write as _;
 use std::time::{Duration, Instant};
 
-use anyhow::Context;
+use anyhow::Context as _;
 use retry::retry;
 
 use crate::downloaded::Downloaded;
