@@ -82,7 +82,7 @@ fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
                 }
             }
             Err(err) => println!("{topic} scrape {link} failed: {err:#}"),
-        };
+        }
     }
     videos
 }
