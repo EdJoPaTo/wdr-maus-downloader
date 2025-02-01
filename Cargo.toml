@@ -21,7 +21,7 @@ lto = true
 [dependencies]
 anyhow = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
-frankenstein = "0.37"
+frankenstein = "0.38"
 lazy-regex = "3"
 retry = { version = "2", default-features = false }
 scraper = "0.22"
