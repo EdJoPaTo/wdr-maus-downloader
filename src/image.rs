@@ -8,7 +8,7 @@ use url::Url;
 use crate::temporary::get_tempfile;
 
 pub fn download_jpg(url: &Url) -> anyhow::Result<NamedTempFile> {
-    let mut reader = ureq::get(url.as_str()).call()?.into_reader();
+    let mut reader = ureq::get(url.as_str()).call()?.into_body().into_reader();
     let file = get_tempfile(".jpg")?;
     {
         let mut writer = BufWriter::new(file.as_file());

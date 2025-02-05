@@ -27,7 +27,7 @@ pub struct Scraperesult {
 }
 
 fn get(url: &str) -> anyhow::Result<String> {
-    let body = ureq::get(url).call()?.into_string()?;
+    let body = ureq::get(url).call()?.into_body().read_to_string()?;
     #[cfg(not(debug_assertions))]
     std::thread::sleep(std::time::Duration::from_millis(250));
     Ok(body)

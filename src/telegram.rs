@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 
 use anyhow::Context as _;
+use frankenstein::client_ureq::Bot;
 use frankenstein::{
-    Api, EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
+    EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
     SendPhotoParams, SendVideoParams, TelegramApi as _,
 };
 use url::Url;
@@ -21,35 +22,35 @@ const PUBLIC_CHANNEL: i64 = -1_001_149_205_144;
 const META_CHANNEL: i64 = -1_001_149_205_144;
 
 pub struct Telegram {
-    api: Api,
+    bot: Bot,
 }
 
 impl Telegram {
     pub fn new() -> Self {
         let bot_token = std::env::var("BOT_TOKEN").expect("set BOT_TOKEN via environment variable");
 
-        let api = std::env::var("TELEGRAM_API_ROOT").map_or_else(
+        let bot = std::env::var("TELEGRAM_API_ROOT").map_or_else(
             |_| {
                 println!("Telegram Bot uses official api");
-                Api::new(&bot_token)
+                Bot::new(&bot_token)
             },
             |api_root| {
                 println!("Telegram Bot custom api endpoint: {api_root}");
-                Api::new_url(format!("{api_root}/bot{bot_token}"))
+                Bot::new_url(format!("{api_root}/bot{bot_token}"))
             },
         );
 
-        let me = api.get_me().expect("Telegram get_me failed");
+        let me = bot.get_me().expect("Telegram get_me failed");
         println!(
             "Telegram acts as @{}",
             me.result.username.expect("Bot has no username")
         );
 
-        Self { api }
+        Self { bot }
     }
 
     pub fn send_err(&self, text: &str) {
-        self.api
+        self.bot
             .send_message(
                 &SendMessageParams::builder()
                     .chat_id(META_CHANNEL)
@@ -61,7 +62,7 @@ impl Telegram {
 
     pub fn send_begin(&self, img: &Url, text: &str) -> anyhow::Result<i32> {
         let message_id = self
-            .api
+            .bot
             .send_photo(
                 &SendPhotoParams::builder()
                     .chat_id(META_CHANNEL)
@@ -77,7 +78,7 @@ impl Telegram {
     }
 
     pub fn update_meta(&self, msg_id: i32, text: &str) -> anyhow::Result<()> {
-        self.api
+        self.bot
             .edit_message_caption(
                 &EditMessageCaptionParams::builder()
                     .chat_id(META_CHANNEL)
@@ -103,7 +104,7 @@ impl Telegram {
                 build_media_group_video(normal, caption, thumbnail)?,
                 build_media_group_video(sl, "", sl_tg_thumbnail.path().to_path_buf())?,
             ];
-            self.api
+            self.bot
                 .send_media_group(
                     &SendMediaGroupParams::builder()
                         .chat_id(PUBLIC_CHANNEL)
@@ -113,7 +114,7 @@ impl Telegram {
                 .context("Telegram::send_media_group")?;
         } else {
             let stats = VideoStats::load(&normal)?;
-            self.api
+            self.bot
                 .send_video(
                     &SendVideoParams::builder()
                         .supports_streaming(true)
