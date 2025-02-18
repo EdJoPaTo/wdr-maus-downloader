@@ -32,7 +32,6 @@ impl Downloaded {
     }
 }
 
-#[allow(clippy::min_ident_chars)]
 #[cfg(test)]
 mod tests {
     use std::sync::LazyLock;
@@ -113,6 +112,7 @@ mod tests {
             },
         },
     });
+    #[expect(clippy::min_ident_chars)]
     static B: LazyLock<WdrMedia> = LazyLock::new(|| WdrMedia {
         tracker_data: TrackerData {
             id: "b".into(),

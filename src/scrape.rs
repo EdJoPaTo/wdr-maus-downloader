@@ -104,7 +104,7 @@ fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> 
             .as_str();
         let media = get(media_object_url)?;
         let begin = media.find('{').unwrap_or_default();
-        #[allow(clippy::string_slice)]
+        #[expect(clippy::string_slice)]
         let media = media[begin..].trim_end_matches([')', ';']);
         let media = serde_json::from_str::<WdrMedia>(media)?;
         Ok((img, media))

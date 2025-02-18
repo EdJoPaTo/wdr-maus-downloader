@@ -174,7 +174,7 @@ fn format_duration_works() {
     assert_eq!("1 min 22.00 sec", format_duration(Duration::from_secs(82)));
 }
 
-#[allow(clippy::cast_precision_loss)]
+#[expect(clippy::cast_precision_loss)]
 fn format_filesize(size: u64) -> String {
     let size = size as f32;
     let kb = size / 1024.0;
