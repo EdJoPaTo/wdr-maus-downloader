@@ -93,16 +93,14 @@ impl Telegram {
     pub fn send_public_result(
         &self,
         caption: &str,
-        thumbnail: PathBuf,
+        img: &Url,
         normal: PathBuf,
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
         if let Some(sl) = sl {
-            let sl_big_thumbnail = extract_video_thumbnail(sl.as_path())?;
-            let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
             let media = vec![
-                build_media_group_video(normal, caption, thumbnail)?,
-                build_media_group_video(sl, "", sl_tg_thumbnail.path().to_path_buf())?,
+                build_media_group_video(normal, caption, Some(img))?,
+                build_media_group_video(sl, "", None)?,
             ];
             self.bot
                 .send_media_group(
@@ -121,7 +119,8 @@ impl Telegram {
                         .chat_id(PUBLIC_CHANNEL)
                         .video(normal)
                         .caption(caption)
-                        .thumbnail(thumbnail)
+                        .cover(img.to_string())
+                        .thumbnail(img.to_string())
                         .duration(stats.duration)
                         .width(stats.width)
                         .height(stats.height)
@@ -136,17 +135,28 @@ impl Telegram {
 fn build_media_group_video(
     media: PathBuf,
     caption: &str,
-    thumbnail: PathBuf,
+    img: Option<&Url>,
 ) -> anyhow::Result<Media> {
     let stats = VideoStats::load(&media)?;
-    let video = InputMediaVideo::builder()
+    let builder = InputMediaVideo::builder()
         .supports_streaming(true)
-        .media(media)
         .caption(caption)
-        .thumbnail(thumbnail)
         .duration(stats.duration)
         .width(stats.width)
-        .height(stats.height)
-        .build();
+        .height(stats.height);
+    let video = if let Some(img) = img {
+        builder
+            .media(media)
+            .cover(img.to_string())
+            .thumbnail(img.to_string())
+            .build()
+    } else {
+        let big_thumbnail = extract_video_thumbnail(media.as_path())?;
+        let tg_thumbnail = resize_to_tg_thumbnail(big_thumbnail.path())?;
+        builder
+            .media(media)
+            .thumbnail(tg_thumbnail.path().to_path_buf())
+            .build()
+    };
     Ok(Media::Video(video))
 }

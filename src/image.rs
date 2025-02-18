@@ -1,21 +1,9 @@
-use std::io::BufWriter;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
 use tempfile::NamedTempFile;
-use url::Url;
 
 use crate::temporary::get_tempfile;
-
-pub fn download_jpg(url: &Url) -> anyhow::Result<NamedTempFile> {
-    let mut reader = ureq::get(url.as_str()).call()?.into_body().into_reader();
-    let file = get_tempfile(".jpg")?;
-    {
-        let mut writer = BufWriter::new(file.as_file());
-        std::io::copy(&mut reader, &mut writer)?;
-    }
-    Ok(file)
-}
 
 pub fn resize_to_tg_thumbnail(image: &Path) -> anyhow::Result<NamedTempFile> {
     // TODO: maybe use image and/or imageproc crate
