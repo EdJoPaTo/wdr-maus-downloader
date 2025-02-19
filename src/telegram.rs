@@ -98,9 +98,12 @@ impl Telegram {
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
         if let Some(sl) = sl {
+            let sl_big_thumbnail = extract_video_thumbnail(&sl)?;
+            let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
+            let sl_pathbuf = sl_tg_thumbnail.path().to_path_buf();
             let media = vec![
-                build_media_group_video(normal, caption, Some(img))?,
-                build_media_group_video(sl, "", None)?,
+                build_media_group_video(normal, caption, VideoCover::Url(img.to_string()))?,
+                build_media_group_video(sl, "", VideoCover::Thumbnail(sl_pathbuf))?,
             ];
             self.bot
                 .send_media_group(
@@ -132,31 +135,27 @@ impl Telegram {
     }
 }
 
+enum VideoCover {
+    Url(String),
+    Thumbnail(PathBuf),
+}
+
 fn build_media_group_video(
     media: PathBuf,
     caption: &str,
-    img: Option<&Url>,
+    img: VideoCover,
 ) -> anyhow::Result<Media> {
     let stats = VideoStats::load(&media)?;
     let builder = InputMediaVideo::builder()
+        .media(media)
         .supports_streaming(true)
         .caption(caption)
         .duration(stats.duration)
         .width(stats.width)
         .height(stats.height);
-    let video = if let Some(img) = img {
-        builder
-            .media(media)
-            .cover(img.to_string())
-            .thumbnail(img.to_string())
-            .build()
-    } else {
-        let big_thumbnail = extract_video_thumbnail(media.as_path())?;
-        let tg_thumbnail = resize_to_tg_thumbnail(big_thumbnail.path())?;
-        builder
-            .media(media)
-            .thumbnail(tg_thumbnail.path().to_path_buf())
-            .build()
+    let video = match img {
+        VideoCover::Url(url) => builder.cover(url.clone()).thumbnail(url).build(),
+        VideoCover::Thumbnail(path_buf) => builder.thumbnail(path_buf).build(),
     };
     Ok(Media::Video(video))
 }
