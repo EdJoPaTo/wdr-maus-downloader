@@ -93,6 +93,7 @@ impl Telegram {
     pub fn send_public_result(
         &self,
         caption: &str,
+        cover: PathBuf,
         thumbnail: PathBuf,
         normal: PathBuf,
         sl: Option<PathBuf>,
@@ -101,8 +102,8 @@ impl Telegram {
             let sl_big_thumbnail = extract_video_thumbnail(sl.as_path())?;
             let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
             let media = vec![
-                build_media_group_video(normal, caption, thumbnail)?,
-                build_media_group_video(sl, "", sl_tg_thumbnail.path().to_path_buf())?,
+                build_media_group_video(normal, caption, Some(cover), thumbnail)?,
+                build_media_group_video(sl, "", None, sl_tg_thumbnail.path().to_path_buf())?,
             ];
             self.bot
                 .send_media_group(
@@ -121,6 +122,7 @@ impl Telegram {
                         .chat_id(PUBLIC_CHANNEL)
                         .video(normal)
                         .caption(caption)
+                        .cover(cover)
                         .thumbnail(thumbnail)
                         .duration(stats.duration)
                         .width(stats.width)
@@ -136,6 +138,7 @@ impl Telegram {
 fn build_media_group_video(
     media: PathBuf,
     caption: &str,
+    cover: Option<PathBuf>,
     thumbnail: PathBuf,
 ) -> anyhow::Result<Media> {
     let stats = VideoStats::load(&media)?;
@@ -143,6 +146,7 @@ fn build_media_group_video(
         .supports_streaming(true)
         .media(media)
         .caption(caption)
+        .maybe_cover(cover)
         .thumbnail(thumbnail)
         .duration(stats.duration)
         .width(stats.width)

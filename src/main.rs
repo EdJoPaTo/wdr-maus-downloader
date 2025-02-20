@@ -101,10 +101,16 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let meta_msg = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
-    let thumbnail = {
-        let img_downloaded = download_jpg(img)?;
-        resize_to_tg_thumbnail(img_downloaded.path())?
-    };
+    let cover = download_jpg(img)?;
+    let cover_took = start.elapsed();
+    let cover_filesize = path_filesize_string(cover.path()).expect("cant read cover size");
+    println!(
+        "cover took {}  {cover_filesize}",
+        format_duration(cover_took)
+    );
+
+    let start = Instant::now();
+    let thumbnail = resize_to_tg_thumbnail(cover.path())?;
     let thumbnail_took = start.elapsed();
     let thumbnail_filesize =
         path_filesize_string(thumbnail.path()).expect("cant read thumbnail size");
@@ -131,7 +137,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     println!("Filesizes   Normal: {normal_filesize}   DGS: {sl_filesize}");
 
     let mut meta_caption = format!(
-        "{public_caption}\n\nThumbnail: {thumbnail_filesize} / 200 kB\nNormal: {normal_filesize}\nDGS: {sl_filesize}\n\ndownload took {}\n",
+        "{public_caption}\n\nCover: {cover_filesize}\nThumbnail: {thumbnail_filesize} / 200 kB\nNormal: {normal_filesize}\nDGS: {sl_filesize}\n\ndownload took {}\n",
         format_duration(download_took)
     );
     retry(retry::delay::Fixed::from_millis(60_000).take(2), || {
@@ -142,6 +148,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let start = Instant::now();
     tg.send_public_result(
         &public_caption,
+        cover.path().to_path_buf(),
         thumbnail.path().to_path_buf(),
         normal.path().to_path_buf(),
         sl.as_ref().map(|tempfile| tempfile.path().to_path_buf()),
