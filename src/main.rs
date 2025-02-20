@@ -97,7 +97,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
         || format!("{title}\n#{topic}"),
         |air_time| format!("{title}\n{air_time} #{topic}"),
     );
-    let meta_msg = tg.send_begin(img, &public_caption)?;
+    let (meta_msg, img_file_id) = tg.send_begin(img, &public_caption)?;
 
     let start = Instant::now();
     let normal = ffmpeg::download(video, caption_srt)?;
@@ -128,7 +128,7 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let start = Instant::now();
     tg.send_public_result(
         &public_caption,
-        img,
+        img_file_id,
         normal.path().to_path_buf(),
         sl.as_ref().map(|tempfile| tempfile.path().to_path_buf()),
     )?;

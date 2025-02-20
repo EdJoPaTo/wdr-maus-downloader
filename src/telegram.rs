@@ -60,8 +60,8 @@ impl Telegram {
             .expect("Send error to Telegram failed");
     }
 
-    pub fn send_begin(&self, img: &Url, text: &str) -> anyhow::Result<i32> {
-        let message_id = self
+    pub fn send_begin(&self, img: &Url, text: &str) -> anyhow::Result<(i32, String)> {
+        let message = self
             .bot
             .send_photo(
                 &SendPhotoParams::builder()
@@ -72,9 +72,16 @@ impl Telegram {
                     .build(),
             )
             .context("Telegram::send_photo")?
-            .result
-            .message_id;
-        Ok(message_id)
+            .result;
+        let message_id = message.message_id;
+        let file_id = message
+            .photo
+            .expect("sendPhoto should contain a photo")
+            .into_iter()
+            .next()
+            .expect("sendPhoto result should contain at least one photo size")
+            .file_id;
+        Ok((message_id, file_id))
     }
 
     pub fn update_meta(&self, msg_id: i32, text: &str) -> anyhow::Result<()> {
@@ -93,7 +100,7 @@ impl Telegram {
     pub fn send_public_result(
         &self,
         caption: &str,
-        img: &Url,
+        img_file_id: String,
         normal: PathBuf,
         sl: Option<PathBuf>,
     ) -> anyhow::Result<()> {
@@ -102,7 +109,7 @@ impl Telegram {
             let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
             let sl_pathbuf = sl_tg_thumbnail.path().to_path_buf();
             let media = vec![
-                build_media_group_video(normal, caption, VideoCover::Url(img.to_string()))?,
+                build_media_group_video(normal, caption, VideoCover::FileId(img_file_id))?,
                 build_media_group_video(sl, "", VideoCover::Thumbnail(sl_pathbuf))?,
             ];
             self.bot
@@ -122,8 +129,8 @@ impl Telegram {
                         .chat_id(PUBLIC_CHANNEL)
                         .video(normal)
                         .caption(caption)
-                        .cover(img.to_string())
-                        .thumbnail(img.to_string())
+                        .cover(img_file_id.clone())
+                        .thumbnail(img_file_id)
                         .duration(stats.duration)
                         .width(stats.width)
                         .height(stats.height)
@@ -136,7 +143,7 @@ impl Telegram {
 }
 
 enum VideoCover {
-    Url(String),
+    FileId(String),
     Thumbnail(PathBuf),
 }
 
@@ -154,7 +161,7 @@ fn build_media_group_video(
         .width(stats.width)
         .height(stats.height);
     let video = match img {
-        VideoCover::Url(url) => builder.cover(url.clone()).thumbnail(url).build(),
+        VideoCover::FileId(file_id) => builder.cover(file_id.clone()).thumbnail(file_id).build(),
         VideoCover::Thumbnail(path_buf) => builder.thumbnail(path_buf).build(),
     };
     Ok(Media::Video(video))
