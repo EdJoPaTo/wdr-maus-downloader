@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use anyhow::Context as _;
 use frankenstein::client_ureq::Bot;
@@ -93,17 +93,17 @@ impl Telegram {
     pub fn send_public_result(
         &self,
         caption: &str,
-        cover: PathBuf,
-        thumbnail: PathBuf,
-        normal: PathBuf,
-        sl: Option<PathBuf>,
+        cover: &Path,
+        thumbnail: &Path,
+        normal: &Path,
+        sl: Option<&Path>,
     ) -> anyhow::Result<()> {
         if let Some(sl) = sl {
-            let sl_big_thumbnail = extract_video_thumbnail(sl.as_path())?;
+            let sl_big_thumbnail = extract_video_thumbnail(sl)?;
             let sl_tg_thumbnail = resize_to_tg_thumbnail(sl_big_thumbnail.path())?;
             let media = vec![
                 build_media_group_video(normal, caption, Some(cover), thumbnail)?,
-                build_media_group_video(sl, "", None, sl_tg_thumbnail.path().to_path_buf())?,
+                build_media_group_video(sl, "", None, sl_tg_thumbnail.path())?,
             ];
             self.bot
                 .send_media_group(
@@ -114,16 +114,16 @@ impl Telegram {
                 )
                 .context("Telegram::send_media_group")?;
         } else {
-            let stats = VideoStats::load(&normal)?;
+            let stats = VideoStats::load(normal)?;
             self.bot
                 .send_video(
                     &SendVideoParams::builder()
                         .supports_streaming(true)
                         .chat_id(PUBLIC_CHANNEL)
-                        .video(normal)
+                        .video(normal.to_path_buf())
                         .caption(caption)
-                        .cover(cover)
-                        .thumbnail(thumbnail)
+                        .cover(cover.to_path_buf())
+                        .thumbnail(thumbnail.to_path_buf())
                         .duration(stats.duration)
                         .width(stats.width)
                         .height(stats.height)
@@ -136,18 +136,18 @@ impl Telegram {
 }
 
 fn build_media_group_video(
-    media: PathBuf,
+    media: &Path,
     caption: &str,
-    cover: Option<PathBuf>,
-    thumbnail: PathBuf,
+    cover: Option<&Path>,
+    thumbnail: &Path,
 ) -> anyhow::Result<Media> {
-    let stats = VideoStats::load(&media)?;
+    let stats = VideoStats::load(media)?;
     let video = InputMediaVideo::builder()
         .supports_streaming(true)
-        .media(media)
+        .media(media.to_path_buf())
         .caption(caption)
-        .maybe_cover(cover)
-        .thumbnail(thumbnail)
+        .maybe_cover(cover.map(Path::to_path_buf))
+        .thumbnail(thumbnail.to_path_buf())
         .duration(stats.duration)
         .width(stats.width)
         .height(stats.height)

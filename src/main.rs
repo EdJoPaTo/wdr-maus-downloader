@@ -148,10 +148,10 @@ fn handle_one(tg: &Telegram, video: &Scraperesult) -> anyhow::Result<()> {
     let start = Instant::now();
     tg.send_public_result(
         &public_caption,
-        cover.path().to_path_buf(),
-        thumbnail.path().to_path_buf(),
-        normal.path().to_path_buf(),
-        sl.as_ref().map(|tempfile| tempfile.path().to_path_buf()),
+        cover.path(),
+        thumbnail.path(),
+        normal.path(),
+        sl.as_ref().map(tempfile::NamedTempFile::path),
     )?;
     let upload_took = start.elapsed();
     println!("upload   took {}", format_duration(upload_took));
