@@ -8,7 +8,7 @@ use frankenstein::{
 };
 use url::Url;
 
-use crate::ffmpeg::{extract_video_thumbnail, VideoStats};
+use crate::ffmpeg::{VideoStats, extract_video_thumbnail};
 use crate::image::resize_to_tg_thumbnail;
 
 #[cfg(not(debug_assertions))]
