@@ -1,10 +1,12 @@
 use std::path::Path;
 
 use anyhow::Context as _;
+use frankenstein::TelegramApi as _;
 use frankenstein::client_ureq::Bot;
-use frankenstein::{
-    EditMessageCaptionParams, InputMediaVideo, Media, SendMediaGroupParams, SendMessageParams,
-    SendPhotoParams, SendVideoParams, TelegramApi as _,
+use frankenstein::input_media::{InputMediaVideo, MediaGroupInputMedia};
+use frankenstein::methods::{
+    EditMessageCaptionParams, SendMediaGroupParams, SendMessageParams, SendPhotoParams,
+    SendVideoParams,
 };
 use url::Url;
 
@@ -140,7 +142,7 @@ fn build_media_group_video(
     caption: &str,
     cover: Option<&Path>,
     thumbnail: &Path,
-) -> anyhow::Result<Media> {
+) -> anyhow::Result<MediaGroupInputMedia> {
     let stats = VideoStats::load(media)?;
     let video = InputMediaVideo::builder()
         .supports_streaming(true)
@@ -152,5 +154,5 @@ fn build_media_group_video(
         .width(stats.width)
         .height(stats.height)
         .build();
-    Ok(Media::Video(video))
+    Ok(MediaGroupInputMedia::Video(video))
 }

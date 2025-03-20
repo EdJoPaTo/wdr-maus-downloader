@@ -22,7 +22,7 @@ lto = true
 [dependencies]
 anyhow = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
-frankenstein = { version = "0.39", features = ["client-ureq"] }
+frankenstein = { version = "0.40", features = ["client-ureq"] }
 lazy-regex = "3"
 retry = { version = "2", default-features = false }
 scraper = "0.23"
