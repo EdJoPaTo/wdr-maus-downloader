@@ -3,8 +3,6 @@ use std::collections::HashMap;
 use chrono::{Datelike as _, Local, NaiveDate, Timelike as _, Weekday};
 use serde::{Deserialize, Serialize};
 
-use crate::wdr_media::WdrMedia;
-
 const DAILY_PATH: &str = "daily.yaml";
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
@@ -20,8 +18,6 @@ pub struct Daily {
     day: NaiveDate,
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     jobs: HashMap<Job, bool>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    errors: Vec<WdrMedia>,
 }
 
 impl Daily {
@@ -34,7 +30,6 @@ impl Daily {
             .unwrap_or_else(|| Self {
                 day: today,
                 jobs: HashMap::new(),
-                errors: Vec::new(),
             })
     }
 
@@ -45,21 +40,11 @@ impl Daily {
 
     pub fn mark_successful(&mut self, job: Job) {
         self.jobs.insert(job, true);
-        self.errors.clear();
-        self.write();
-    }
-
-    pub fn mark_error(&mut self, error: WdrMedia) {
-        self.errors.push(error);
         self.write();
     }
 
     fn is_done(&self, job: Job) -> bool {
         self.jobs.get(&job).copied().unwrap_or(false)
-    }
-
-    pub fn is_error(&self, media: &WdrMedia) -> bool {
-        self.errors.contains(media)
     }
 
     pub fn get_next(&self) -> Option<Job> {

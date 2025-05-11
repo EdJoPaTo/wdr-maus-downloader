@@ -20,12 +20,6 @@ impl core::fmt::Display for Topic {
     }
 }
 
-pub struct Scraperesult {
-    pub topic: Topic,
-    pub img: Url,
-    pub media: WdrMedia,
-}
-
 fn get(url: &str) -> anyhow::Result<String> {
     let body = ureq::get(url).call()?.into_body().read_to_string()?;
     #[cfg(not(debug_assertions))]
@@ -33,58 +27,70 @@ fn get(url: &str) -> anyhow::Result<String> {
     Ok(body)
 }
 
-pub fn get_aktuell() -> anyhow::Result<Vec<Scraperesult>> {
-    static AKTUELLE: LazyLock<Url> =
-        LazyLock::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
-    get_from_page(Topic::AktuelleSendung, &AKTUELLE)
+pub struct Scraperesult {
+    pub topic: Topic,
+    pub img: Url,
+    pub media: WdrMedia,
 }
 
-pub fn get_sachgeschichten() -> anyhow::Result<Vec<Scraperesult>> {
-    static SACHGESCHICHTEN: LazyLock<Url> = LazyLock::new(|| {
-        Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle").unwrap()
-    });
-    static ZUKUNFT: LazyLock<Url> =
-        LazyLock::new(|| Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap());
-
-    let mut videos = Vec::new();
-    videos.append(&mut get_linked_videos(Topic::Zukunft, &ZUKUNFT)?);
-    videos.append(&mut get_linked_videos(
-        Topic::Sachgeschichte,
-        &SACHGESCHICHTEN,
-    )?);
-    Ok(videos)
+pub struct Scrape {
+    links: Vec<(Topic, Url)>,
 }
 
-fn get_linked_videos(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {
-    static LINK: LazyLock<Selector> = LazyLock::new(|| Selector::parse(".links a").unwrap());
-
-    let body = get(base.as_ref()).context("LinkedVideos")?;
-    let body = scraper::Html::parse_document(&body);
-    let links = body
-        .select(&LINK)
-        .filter_map(|elem| elem.value().attr("href"))
-        .filter_map(|href| base.join(href).ok())
-        .collect::<Vec<_>>();
-    let videos = get_many_pages(topic, &links);
-    anyhow::ensure!(!videos.is_empty(), "no linked videos");
-    Ok(videos)
-}
-
-fn get_many_pages(topic: Topic, links: &[Url]) -> Vec<Scraperesult> {
-    let total = links.len();
-    let mut videos = Vec::new();
-    for link in links {
-        match get_from_page(topic, link) {
-            Ok(mut vec) => {
-                videos.append(&mut vec);
-                if videos.len() % 25 == 0 {
-                    println!("{:>4}/{total:<4} {topic}", videos.len());
-                }
-            }
-            Err(err) => println!("{topic} scrape {link} failed: {err:#}"),
+impl Scrape {
+    pub fn get_aktuell() -> Self {
+        static AKTUELLE: LazyLock<Url> =
+            LazyLock::new(|| Url::parse("https://www.wdrmaus.de/aktuelle-sendung/").unwrap());
+        Self {
+            links: vec![(Topic::AktuelleSendung, AKTUELLE.clone())],
         }
     }
-    videos
+
+    pub fn get_sachgeschichten() -> anyhow::Result<Self> {
+        static SACHGESCHICHTEN: LazyLock<Url> = LazyLock::new(|| {
+            Url::parse("https://www.wdrmaus.de/filme/sachgeschichten/index.php5?filter=alle")
+                .unwrap()
+        });
+        static ZUKUNFT: LazyLock<Url> = LazyLock::new(|| {
+            Url::parse("https://www.wdrmaus.de/extras/mausthemen/zukunft/").unwrap()
+        });
+
+        let mut links = Vec::new();
+        links.append(&mut Self::get_linked(Topic::Sachgeschichte, &SACHGESCHICHTEN)?.links);
+        links.append(&mut Self::get_linked(Topic::Zukunft, &ZUKUNFT)?.links);
+        Ok(Self { links })
+    }
+
+    fn get_linked(topic: Topic, base: &Url) -> anyhow::Result<Self> {
+        static LINK: LazyLock<Selector> = LazyLock::new(|| Selector::parse(".links a").unwrap());
+
+        let body = get(base.as_ref()).context("LinkedVideos")?;
+        let body = scraper::Html::parse_document(&body);
+        let links = body
+            .select(&LINK)
+            .filter_map(|elem| elem.value().attr("href"))
+            .filter_map(|href| base.join(href).ok())
+            .map(|url| (topic, url))
+            .rev() // Vec::pop starts at the end
+            .collect::<Vec<_>>();
+        anyhow::ensure!(!links.is_empty(), "no linked video pages");
+        Ok(Self { links })
+    }
+
+    pub fn len(&self) -> usize {
+        self.links.len()
+    }
+}
+
+impl Iterator for Scrape {
+    type Item = anyhow::Result<Vec<Scraperesult>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (topic, link) = self.links.pop()?;
+        let scraperesult =
+            get_from_page(topic, &link).with_context(|| format!("{topic} scrape {link} failed"));
+        Some(scraperesult)
+    }
 }
 
 fn get_from_page(topic: Topic, base: &Url) -> anyhow::Result<Vec<Scraperesult>> {

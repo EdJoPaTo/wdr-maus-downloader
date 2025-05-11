@@ -1,12 +1,11 @@
 use std::fmt::Write as _;
 use std::time::{Duration, Instant};
 
-use anyhow::Context as _;
 use retry::retry;
 
 use crate::downloaded::Downloaded;
 use crate::image::{download_jpg, resize_to_tg_thumbnail};
-use crate::scrape::Scraperesult;
+use crate::scrape::{Scrape, Scraperesult};
 use crate::telegram::Telegram;
 
 mod daily;
@@ -44,27 +43,35 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         println!("\n\ndo {job:?}…");
         let downloaded = Downloaded::new();
         let all = match job {
-            Job::AktuelleSunday | Job::AktuelleCheckup => scrape::get_aktuell(),
+            Job::AktuelleSunday | Job::AktuelleCheckup => Scrape::get_aktuell(),
             Job::SachgeschichteMorning | Job::SachgeschichteEvening => {
-                scrape::get_sachgeschichten()
+                Scrape::get_sachgeschichten()?
             }
-        }
-        .context("Failed to scrape")?;
-        println!("found {} videos", all.len());
-        for scraperesult in all {
-            if !downloaded.was_downloaded(&scraperesult.media)
-                && !daily.is_error(&scraperesult.media)
-            {
-                match handle_one(tg, &scraperesult).context("Failed to download") {
-                    Ok(()) => Downloaded::mark_downloaded(scraperesult.media),
-                    Err(err) => {
-                        daily.mark_error(scraperesult.media);
-                        return Err(err);
+        };
+        let total = all.len();
+        println!("found {total} video links");
+        'scrape: for (i, scraperesults) in all.enumerate() {
+            if i % 25 == 0 {
+                println!("{i:>4}/{total:<4} {job:?}");
+            }
+            match scraperesults {
+                Ok(scraperesults) => {
+                    for scraperesult in scraperesults {
+                        if downloaded.was_downloaded(&scraperesult.media) {
+                            continue;
+                        }
+                        if let Err(error) = handle_one(tg, &scraperesult) {
+                            eprintln!("Failed to download: {error:#}");
+                            tg.send_err(&format!("ERROR Failed to download: {error:#}"));
+                            continue;
+                        }
+                        Downloaded::mark_downloaded(scraperesult.media);
+                        if !matches!(job, Job::AktuelleCheckup | Job::AktuelleSunday) {
+                            break 'scrape;
+                        }
                     }
                 }
-                if !matches!(job, Job::AktuelleCheckup | Job::AktuelleSunday) {
-                    break;
-                }
+                Err(error) => eprintln!("{error:#}"),
             }
         }
         daily.mark_successful(job);
