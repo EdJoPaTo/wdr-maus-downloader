@@ -77,7 +77,7 @@ impl Scrape {
         Ok(Self { links })
     }
 
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.links.len()
     }
 }
