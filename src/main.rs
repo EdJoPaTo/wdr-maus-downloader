@@ -51,7 +51,7 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
         let total = all.len();
         println!("found {total} video links");
         'scrape: for (i, scraperesults) in all.enumerate() {
-            if i % 25 == 0 {
+            if i.is_multiple_of(25) {
                 println!("{i:>4}/{total:<4} {job:?}");
             }
             match scraperesults {
