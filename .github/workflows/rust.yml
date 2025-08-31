@@ -2,24 +2,21 @@ name: Rust
 
 on:
   push:
-    branches-ignore: ["dependabot/**"]
   pull_request:
   workflow_dispatch:
 
 jobs:
   rustfmt:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: cargo fmt --check --verbose
 
   clippy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     continue-on-error: ${{ (matrix.toolchain == 'beta') || (matrix.toolchain == 'nightly') }}
     strategy:
       fail-fast: false
@@ -36,7 +33,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: cargo fetch
       - uses: actions/cache@v4
         with:
@@ -47,7 +44,6 @@ jobs:
 
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
     continue-on-error: ${{ matrix.toolchain == 'nightly' }}
     strategy:
       fail-fast: false
@@ -63,7 +59,7 @@ jobs:
         id: rust
         with:
           toolchain: ${{ matrix.toolchain }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: cargo fetch
       - uses: actions/cache@v4
         with:
@@ -75,7 +71,6 @@ jobs:
   release:
     name: Release ${{ matrix.triple }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
     permissions:
       contents: write
     strategy:
@@ -92,7 +87,7 @@ jobs:
         with:
           targets: ${{ matrix.triple }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
