@@ -24,7 +24,7 @@ fn main() {
     loop {
         // Do not create load right on startup
         #[cfg(not(debug_assertions))]
-        std::thread::sleep(Duration::from_secs(5 * 60)); // 5 min
+        std::thread::sleep(Duration::from_mins(5));
 
         if let Err(err) = iteration(&tg) {
             println!("Iteration failed {err:#}");
