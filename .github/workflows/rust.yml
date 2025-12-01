@@ -12,7 +12,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: cargo fmt --check --verbose
 
   clippy:
@@ -33,7 +33,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: cargo fetch
       - uses: actions/cache@v4
         with:
@@ -59,7 +59,7 @@ jobs:
         id: rust
         with:
           toolchain: ${{ matrix.toolchain }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: cargo fetch
       - uses: actions/cache@v4
         with:
@@ -87,7 +87,7 @@ jobs:
         with:
           targets: ${{ matrix.triple }}
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -118,7 +118,7 @@ jobs:
           -C target/${{ matrix.triple }}/release/ wdr-maus-downloader
           | gzip --best > ${{ env.ARTIFACT_NAME }}.tar.gz
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.triple }}
           path: |
