@@ -8,10 +8,22 @@ updates:
     open-pull-requests-limit: 30
     schedule:
       interval: "monthly"
-      day: "saturday"
       time: "02:42" # UTC
     commit-message:
       prefix: "build(cargo):"
     groups:
       patches:
         update-types: ["patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "02:42" # UTC
+    commit-message:
+      prefix: "ci(actions):"
+    groups:
+      actions:
+        patterns: ["actions/*"]
+      docker:
+        patterns: ["docker/*"]
