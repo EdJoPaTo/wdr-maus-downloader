@@ -61,8 +61,9 @@ fn iteration(tg: &Telegram) -> anyhow::Result<()> {
                             continue;
                         }
                         if let Err(error) = handle_one(tg, &scraperesult) {
-                            eprintln!("Failed to download: {error:#}");
-                            tg.send_err(&format!("ERROR Failed to download: {error:#}"));
+                            let title = &scraperesult.media.tracker_data.title;
+                            eprintln!("Failed to download {title:?}: {error:#}");
+                            tg.send_err(&format!("ERROR Failed to download {title:?}: {error:#}"));
                             continue;
                         }
                         Downloaded::mark_downloaded(scraperesult.media);
