@@ -19,11 +19,15 @@ FROM docker.io/library/alpine:3 AS final
 RUN apk upgrade --no-cache \
 	&& apk add --no-cache ffmpeg imagemagick \
 	&& ffmpeg -version \
-	&& magick -version
-
-WORKDIR /app
-ENV TZ=Europe/Berlin
-VOLUME /app
+	&& magick -version \
+	&& addgroup -g 1234 runner \
+	&& adduser -D -u 1234 -G runner runner \
+	&& rm -f -- /etc/*-
 
 COPY --from=builder /build/target/release/wdr-maus-downloader /usr/local/bin/
+
+ENV TZ=Europe/Berlin
+USER runner
+WORKDIR /app
+VOLUME /app
 ENTRYPOINT ["wdr-maus-downloader"]
