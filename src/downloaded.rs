@@ -9,9 +9,9 @@ pub struct Downloaded {
 impl Downloaded {
     #[must_use]
     pub fn new() -> Self {
-        let list = std::fs::read_to_string(DOWNLOADED_PATH)
-            .map(|content| serde_yaml::from_str(&content).expect("downloaded.yaml format error"))
-            .unwrap_or_default();
+        let list = std::fs::read_to_string(DOWNLOADED_PATH).map_or_default(|content| {
+            serde_yaml::from_str(&content).expect("downloaded.yaml format error")
+        });
         Self { list }
     }
 
